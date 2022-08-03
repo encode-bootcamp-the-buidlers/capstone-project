@@ -14,11 +14,8 @@ const deployGovernanceToken: DeployFunction = async function (hre: HardhatRuntim
 
   log("Deploying GovernanceToken and waiting for confirmations...")
 
-  const maxSupply = 1_000
-
   const governanceToken = await deploy("GovernanceToken", {
     from: deployer,
-    args: [maxSupply],
     log: true,
     // we need to wait if on a live network so we can verify properly
     waitConfirmations: networkConfig[network.name].blockConfirmations || 1,
