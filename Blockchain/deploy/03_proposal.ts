@@ -1,8 +1,8 @@
-import { HardhatRuntimeEnvironment } from "hardhat/types"
-import { DeployFunction } from "hardhat-deploy/types"
-import verify from "../scripts/utils/verify"
-import { networkConfig, developmentChains } from "../hardhat-helper-config"
 import { ethers } from "hardhat"
+import { DeployFunction } from "hardhat-deploy/types"
+import { HardhatRuntimeEnvironment } from "hardhat/types"
+import { developmentChains, networkConfig, proposalConfig } from "../hardhat-helper-config"
+import verify from "../scripts/utils/verify"
 
 const deployProposal: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // @ts-ignore
@@ -13,11 +13,9 @@ const deployProposal: DeployFunction = async function (hre: HardhatRuntimeEnviro
   log("----------------------------------------------------")
   log("Deploying Proposal and waiting for confirmations...")
 
-  const proposalName = "Test"
-
   const proposal = await deploy("Proposal", {
     from: deployer,
-    args: [proposalName],
+    args: [proposalConfig.PROPOSAL_NAME],
     log: true,
     // we need to wait if on a live network so we can verify properly
     waitConfirmations: networkConfig[network.name].blockConfirmations || 1,
@@ -32,7 +30,7 @@ const deployProposal: DeployFunction = async function (hre: HardhatRuntimeEnviro
   const proposalContract = await ethers.getContractAt("Proposal", proposal.address)
 
   const governor = await get("GovernorContract")
-  
+
   const transferTx = await proposalContract.transferOwnership(governor.address)
 
   await transferTx.wait(1)

@@ -1,8 +1,8 @@
-import { HardhatRuntimeEnvironment } from "hardhat/types"
-import { DeployFunction } from "hardhat-deploy/types"
-import verify from "../scripts/utils/verify"
-import { networkConfig, developmentChains } from "../hardhat-helper-config"
 import { ethers } from "hardhat"
+import { DeployFunction } from "hardhat-deploy/types"
+import { HardhatRuntimeEnvironment } from "hardhat/types"
+import { developmentChains, governorTokenConfig, networkConfig } from "../hardhat-helper-config"
+import verify from "../scripts/utils/verify"
 
 const deployGovernanceToken: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // @ts-ignore
@@ -13,13 +13,10 @@ const deployGovernanceToken: DeployFunction = async function (hre: HardhatRuntim
   log("----------------------------------------------------")
   log("Deploying GovernanceToken and waiting for confirmations...")
 
-  const governanceTokenName = "DAO got talent "
-  const governanceTokenSymbol = "DAOGT"
-
   const governanceToken = await deploy("GovernanceToken", {
     from: deployer,
     log: true,
-    args: [governanceTokenName, governanceTokenSymbol],
+    args: [governorTokenConfig.TOKEN_NAME, governorTokenConfig.TOKEN_SYMBOL],
     // we need to wait if on a live network so we can verify properly
     waitConfirmations: networkConfig[network.name].blockConfirmations || 1,
   })

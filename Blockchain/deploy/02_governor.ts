@@ -13,12 +13,10 @@ const deployGovernorContract: DeployFunction = async function (hre: HardhatRunti
   log("----------------------------------------------------")
   log("Deploying GovernorContract and waiting for confirmations...")
 
-  const governorName = "GovernorContract"
-
   const governorContract = await deploy("GovernorContract", {
     from: deployer,
     args: [
-      governorName,
+      governorConfig.GOVERNOR_NAME,
       governanceToken.address,
       governorConfig.QUORUM_PERCENTAGE,
       governorConfig.VOTING_PERIOD,
