@@ -1,7 +1,7 @@
-import { HardhatRuntimeEnvironment } from "hardhat/types"
 import { DeployFunction } from "hardhat-deploy/types"
+import { HardhatRuntimeEnvironment } from "hardhat/types"
+import { ballotConfig, developmentChains, networkConfig } from "../hardhat-helper-config"
 import verify from "../scripts/utils/verify"
-import { networkConfig, developmentChains } from "../hardhat-helper-config"
 
 const deployBallot: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // @ts-ignore
@@ -15,7 +15,7 @@ const deployBallot: DeployFunction = async function (hre: HardhatRuntimeEnvironm
 
   const Ballot = await deploy("Ballot", {
     from: deployer,
-    args: [governanceToken.address],
+    args: [governanceToken.address, ballotConfig.ipfsFolderCIDs],
     log: true,
     // we need to wait if on a live network so we can verify properly
     waitConfirmations: networkConfig[network.name].blockConfirmations || 1,
@@ -29,3 +29,4 @@ const deployBallot: DeployFunction = async function (hre: HardhatRuntimeEnvironm
 }
 
 export default deployBallot
+deployBallot.tags = ["all", "ballot"]

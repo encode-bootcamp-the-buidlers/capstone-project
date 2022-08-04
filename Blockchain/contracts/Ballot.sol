@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
+import "hardhat/console.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 // local contracts
@@ -23,9 +24,10 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
 
   // This is a type for a single proposal.
   struct Proposal {
-    uint8 index; // index for the NFT collection
+    uint256 index; // index for the NFT collection
     uint256 voteCount; // number of accumulated votes
     bool active; // the proposal is still being voted on
+    string ipfsFolderCID;
   }
   address public chairperson;
 
@@ -41,17 +43,19 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   uint256 public immutable interval;
   uint256 public lastTimeStamp;
 
-  constructor(address _voteToken) {
+  constructor(address _voteToken, string[] memory _ipfsFolderCIDs) {
     interval = 1 days; // 6575;
     chairperson = msg.sender;
     voters[chairperson].weight = 1;
 
-    // hardcoding indexes 0 to 3 (4 collections) for now
-    for (uint8 i = 0; i < 4; i++) {
-      proposals.push(Proposal({index: i, voteCount: 0, active: true}));
-    }
     voteToken = IERC20Votes(_voteToken);
     referenceBlock = block.number;
+
+    for (uint256 i = 0; i < _ipfsFolderCIDs.length; i++) {
+      proposals.push(
+        Proposal({index: i, voteCount: 0, active: true, ipfsFolderCID: _ipfsFolderCIDs[i]})
+      );
+    }
   }
 
   // Give `voter` the right to vote on this ballot.
@@ -152,7 +156,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   // Calls winningProposal() function to get the index
   // of the winner contained in the proposals array and then
   // returns the index of the winner
-  function winnerIndex() external view returns (uint8 winnerIndex_) {
+  function winnerIndex() external view returns (uint256 winnerIndex_) {
     winnerIndex_ = proposals[winningProposal()].index;
   }
 
