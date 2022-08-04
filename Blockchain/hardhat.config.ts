@@ -36,6 +36,7 @@ const config: HardhatUserConfig = {
       },
     },
   },
+  paths: { tests: 'tests' },
   etherscan: {
     apiKey: ETHERSCAN_API_KEY,
   },
