@@ -42,17 +42,13 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   uint256 public lastTimeStamp;
 
   constructor(address _voteToken) {
-    uint8[] memory collectionIndexes;
-    // hardcoding collection indexes 0 to 3 (4 collections) for now
-    for (uint8 i = 0; i < 4; i++) {
-      collectionIndexes[i] = i;
-    }
-    interval = 6575; // 1 day
+    interval = 1 days; // 6575;
     chairperson = msg.sender;
     voters[chairperson].weight = 1;
 
-    for (uint256 i = 0; i < collectionIndexes.length; i++) {
-      proposals.push(Proposal({index: collectionIndexes[i], voteCount: 0, active: true}));
+    // hardcoding indexes 0 to 3 (4 collections) for now
+    for (uint8 i = 0; i < 4; i++) {
+      proposals.push(Proposal({index: i, voteCount: 0, active: true}));
     }
     voteToken = IERC20Votes(_voteToken);
     referenceBlock = block.number;
