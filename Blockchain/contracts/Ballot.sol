@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.12;
+pragma solidity ^0.8.9;
 
 import "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
@@ -186,7 +186,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
       lastTimeStamp = block.timestamp;
       // TODO. Mint 10 NFTs for the collection
       for (uint256 i = 0; i < 10; i++) {
-        NFTContract.safeMint(chairperson, string.concat("ipfsurl", Strings.toString(i)));
+        NFTContract.safeMint(chairperson, string(abi.encodePacked("ipfsurl", Strings.toString(i))));
       }
       // TODO. Need to pass the correct proposal index
       proposals[0].active = false;
