@@ -23,7 +23,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
 
   // This is a type for a single proposal.
   struct Proposal {
-    bytes32 name; // short name (up to 32 bytes)
+    uint8 index; // index for the NFT collection
     uint256 voteCount; // number of accumulated votes
     bool active; // the proposal is still being voted on
   }
@@ -41,13 +41,18 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   uint256 public immutable interval;
   uint256 public lastTimeStamp;
 
-  constructor(bytes32[] memory proposalNames, address _voteToken) {
+  constructor(address _voteToken) {
+    uint8[] memory collectionIndexes;
+    // hardcoding collection indexes 0 to 3 (4 collections) for now
+    for (uint8 i = 0; i < 4; i++) {
+      collectionIndexes[i] = i;
+    }
     interval = 6575; // 1 day
     chairperson = msg.sender;
     voters[chairperson].weight = 1;
 
-    for (uint256 i = 0; i < proposalNames.length; i++) {
-      proposals.push(Proposal({name: proposalNames[i], voteCount: 0, active: true}));
+    for (uint256 i = 0; i < collectionIndexes.length; i++) {
+      proposals.push(Proposal({index: collectionIndexes[i], voteCount: 0, active: true}));
     }
     voteToken = IERC20Votes(_voteToken);
     referenceBlock = block.number;
@@ -115,7 +120,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   }
 
   /// Give your vote (including votes delegated to you)
-  /// to proposal `proposals[proposal].name`.
+  /// to proposal `proposals[proposal].index`.
   function vote(uint256 proposal) external {
     Voter storage sender = voters[msg.sender];
     require(proposals[proposal].active, "Proposal ended");
@@ -150,9 +155,9 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
 
   // Calls winningProposal() function to get the index
   // of the winner contained in the proposals array and then
-  // returns the name of the winner
-  function winnerName() external view returns (bytes32 winnerName_) {
-    winnerName_ = proposals[winningProposal()].name;
+  // returns the index of the winner
+  function winnerIndex() external view returns (uint8 winnerIndex_) {
+    winnerIndex_ = proposals[winningProposal()].index;
   }
 
   function votingPower() public view returns (uint256 votingPower_) {
