@@ -26,7 +26,7 @@ contract NFTContract is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Burnab
 
   Counters.Counter private _tokenIdCounter;
 
-  constructor() ERC721("NFTContract", "GTK") {}
+  constructor() ERC721("NFTContract", "NFT") {}
 
   /// @dev safeMint mints an NFT token to the requesting user's address
   /// @param to mint to address, @param uri is the ipfs location of metadata of the minted NFT

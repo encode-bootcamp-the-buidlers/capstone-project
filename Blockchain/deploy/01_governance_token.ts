@@ -45,4 +45,3 @@ const delegate = async (governanceTokenAddress: string, delegatedAccount: string
 }
 
 export default deployGovernanceToken
-deployGovernanceToken.tags = ["all", "governor"]
