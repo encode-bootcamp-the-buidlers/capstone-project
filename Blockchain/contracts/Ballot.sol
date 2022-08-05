@@ -124,12 +124,9 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   function vote(uint256 proposal) external {
     Voter storage sender = voters[msg.sender];
     require(proposals[proposal].active, "Proposal ended");
-    require(sender.weight != 0, "Has no right to vote");
     require(!sender.voted, "Already voted.");
+    require(sender.weight != 0, "Has no right to vote");
     spentVotePower[msg.sender] += voters[msg.sender].weight;
-    // TODO: we should burn the governance tokens once the participant has voted
-    // For now, we simply set his weight/voting power to 0 (HACK)
-    voters[msg.sender].weight = 1;
     sender.voted = true;
     sender.vote = proposal;
 
@@ -137,6 +134,9 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     // this will throw automatically and revert all
     // changes.
     proposals[proposal].voteCount += sender.weight;
+    // TODO: we should burn the governance tokens once the participant has voted
+    // For now, we simply set his weight/voting power to 0 (HACK)
+    voters[msg.sender].weight = 0;
   }
 
   /// @dev Computes the winning proposal taking all
