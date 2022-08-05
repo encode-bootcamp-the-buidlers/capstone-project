@@ -20,5 +20,10 @@ export const networkConfig: networkConfigInfo = {
 export const developmentChains = ["hardhat", "localhost"]
 
 export const ballotConfig = {
-  ipfsFolderCIDs: ["QmPkrpqECpnUYDE1FfMAj4ZeoY4KdjAXt8dzW4GufELG7A"],
+  ipfsFolderCIDs: [
+    "Qma67uxmsq8ZnXy36CYyAiA9wRpHKqXcgygGJhi93JMtzp",
+    "QmZwq3UFdWCvaTsZr9bpXcMuNPwJTVTRvN7Q3yF7i4ChRX",
+    "QmYJdoS1QnU3wDoDaVLVkKXjmHgV3bj5j7igTi6oqxHcaz",
+    "Qmae9doNZGn2EbGpKpgBiEU61HgBKNuYmU6uCuvKGSZGym",
+  ],
 }

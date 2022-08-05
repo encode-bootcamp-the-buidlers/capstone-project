@@ -129,7 +129,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     spentVotePower[msg.sender] += voters[msg.sender].weight;
     // TODO: we should burn the governance tokens once the participant has voted
     // For now, we simply set his weight/voting power to 0 (HACK)
-    voters[msg.sender].weight = 0;
+    voters[msg.sender].weight = 1;
     sender.voted = true;
     sender.vote = proposal;
 
