@@ -148,7 +148,6 @@ describe("Ballot", async () => {
     describe("when someone interacts with the winnerIndex function after one vote is cast for the first proposal", function () {
       it("should set the index of the first proposal as the winning proposal", async function () {
         const proposals = await ballot.proposals
-        console.log(proposals.length)
         await vote(ballot, accounts[0], 0)
         const winnerIndex = await ballot.winnerIndex()
         expect(winnerIndex).to.eq(0)
