@@ -45,6 +45,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
 
   constructor(address _voteToken, string[] memory _ipfsFolderCIDs) {
     interval = 1 days; // 6575;
+    lastTimeStamp = block.timestamp;
     chairperson = msg.sender;
     voters[chairperson].weight = 1;
 
@@ -189,10 +190,21 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     //We highly recommend revalidating the upkeep in the performUpkeep function
     if ((block.timestamp - lastTimeStamp) > interval) {
       lastTimeStamp = block.timestamp;
-      // TODO. Mint 10 NFTs for the collection
-      for (uint256 i = 0; i < 10; i++) {
-        NFTContract.safeMint(chairperson, string(abi.encodePacked("ipfsurl", Strings.toString(i))));
-      }
+      Proposal storage winningProposal = proposals[winningProposal()];
+
+      string memory tokenUri = string(abi.encodePacked("ipfs://", winningProposal.ipfsFolderCID));
+      safeMint(chairperson, tokenUri);
+
+      // TODO. We need to store in the propsal struct what size the collection has
+      // and then loop over it here, delete the 2 lines above then
+      // for (uint256 i = 0; i < winningProposal.collectionSize; i++) {
+      //   string memory prefix = string(abi.encodePacked("ipfs://", winningProposal.ipfsFolderCID));
+      //   string memory suffix = string(abi.encodePacked("/", Strings.toString(i)));
+      //   string memory tokenUri = string(abi.encodePacked(prefix, suffix));
+
+      //   safeMint(chairperson, tokenUri);
+      // }
+
       // TODO. Need to pass the correct proposal index
       proposals[0].active = false;
     }
