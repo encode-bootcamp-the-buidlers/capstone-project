@@ -87,17 +87,17 @@ describe("Ballot", async () => {
     })
   })
 
-  describe("when the voter interact with the vote function in the contract", function () {
+  describe("when the voter interacts with the vote function in the contract", function () {
     it("should has the right to vote", async function () {
       await expect(vote(ballot, accounts[1], 0)).to.be.revertedWith("Has no right to vote")
     })
 
-    it("should not has voted already", async function () {
+    it("should not have voted already", async function () {
       await vote(ballot, accounts[0], 0)
       await expect(vote(ballot, accounts[0], 1)).to.be.revertedWith("Already voted.")
     })
 
-    describe("when the voter interact with the delegate function in the contract", function () {
+    describe("when the voter interacts with the delegate function in the contract", function () {
       it("should has not already voted", async function () {
         await vote(ballot, accounts[0], 0)
         await expect(delegate(ballot, accounts[0], accounts[1].address)).to.be.revertedWith(
@@ -112,7 +112,7 @@ describe("Ballot", async () => {
       })
     })
 
-    describe("when the an attacker interact with the giveRightToVote function in the contract", function () {
+    describe("when an attacker interacts with the giveRightToVote function in the contract", function () {
       it("can not give voting rights", async function () {
         await expect(giveRightToVote(ballot, accounts[2].address, accounts[1])).to.be.revertedWith(
           "Only chairperson can give right to vote."
@@ -120,7 +120,7 @@ describe("Ballot", async () => {
       })
     })
 
-    describe("when the an attacker interact with the vote function in the contract", function () {
+    describe("when an attacker interacts with the vote function in the contract", function () {
       describe("and the proposal does not exist", function () {
         it("should revert all the state changes", async function () {
           await expect(vote(ballot, accounts[0], 1337)).to.be.revertedWith("")
@@ -128,7 +128,7 @@ describe("Ballot", async () => {
       })
     })
 
-    describe("when the an attacker interact with the delegate function in the contract", function () {
+    describe("when an attacker interacts with the delegate function in the contract", function () {
       it("can not produce loop in delegation", async function () {
         await giveRightToVote(ballot, accounts[1].address)
         await delegate(ballot, accounts[0], accounts[1].address)
@@ -138,24 +138,24 @@ describe("Ballot", async () => {
       })
     })
 
-    describe("when someone interact with the winnerIndex function before any votes are cast", function () {
+    describe("when someone interacts with the winnerIndex function before any votes are cast", function () {
       it("should return the index of the first proposal", async function () {
         const winnerIndex = await ballot.winnerIndex()
         expect(winnerIndex).to.eq(0)
       })
     })
 
-    describe("when someone interact with the winnerIndex function after one vote is cast for the first proposal", function () {
+    describe("when someone interacts with the winnerIndex function after one vote is cast for the first proposal", function () {
       it("should set the index of the first proposal as the winning proposal", async function () {
-        const proposals = await ballot.proposals;
-        console.log(proposals.length);
+        const proposals = await ballot.proposals
+        console.log(proposals.length)
         await vote(ballot, accounts[0], 0)
         const winnerIndex = await ballot.winnerIndex()
         expect(winnerIndex).to.eq(0)
       })
     })
 
-    describe("when someone interact with the winnerIndex function after 5 random votes are cast for the proposals", function () {
+    describe("when someone interacts with the winnerIndex function after 5 random votes are cast for the proposals", function () {
       it("should return the index of the proposal with highest votes count", async function () {
         await giveRightToVote(ballot, accounts[1].address)
         await giveRightToVote(ballot, accounts[2].address)
