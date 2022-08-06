@@ -5,8 +5,6 @@ import { ballotConfig } from "../hardhat-helper-config"
 import { Ballot } from "../typechain-types/contracts/Ballot.sol"
 import { increaseTime } from "../utils/test"
 
-const DEFAULT_PROPOSALS_INDEXES = [0, 1, 2, 3]
-
 let ballot: Ballot
 let accounts: any[]
 
@@ -39,17 +37,14 @@ async function winningProposal(ballot: Ballot) {
 }
 
 describe("Ballot", async () => {
-  it("has the provided proposals", async function () {
-    for (let index = 0; index < DEFAULT_PROPOSALS_INDEXES.length; index++) {
+  it("has the provided proposals setup correctly", async function () {
+    for (let index = 0; index < ballotConfig.ipfsFolderCIDs.length; index++) {
       const proposal = await ballot.proposals(index)
-      expect(proposal.index.toNumber()).to.eq(DEFAULT_PROPOSALS_INDEXES[index])
-    }
-  })
-
-  it("has zero votes for all proposals", async function () {
-    for (let index = 0; index < DEFAULT_PROPOSALS_INDEXES.length; index++) {
-      const proposal = await ballot.proposals(index)
+      expect(proposal.index.toNumber()).to.eq(index)
       expect(proposal.voteCount.toNumber()).to.eq(0)
+      expect(proposal.collectionSize.toNumber()).to.eq(ballotConfig.collectionsSize[index])
+      expect(proposal.active).to.eq(true)
+      expect(proposal.ipfsFolderCID).to.eq(ballotConfig.ipfsFolderCIDs[index])
     }
   })
 
@@ -187,7 +182,7 @@ describe("Ballot", async () => {
     })
 
     it("doesn't trigger checkUpkeep when interval time not reached yet 2", async () => {
-      const seconds = 60
+      const seconds = (await ballot.interval()).toNumber() - 5 // 5 seconds before interval
       await increaseTime(seconds)
 
       const [upkeepNeeded] = await ballot.checkUpkeep([])
@@ -195,15 +190,17 @@ describe("Ballot", async () => {
     })
 
     it("triggers checkUpkeep when interval time is reached", async () => {
-      await increaseTime()
+      await increaseTime((await ballot.interval()).toNumber())
 
       const [upkeepNeeded] = await ballot.checkUpkeep([])
       expect(upkeepNeeded).to.equal(true)
     })
 
     it("should not be able to call performUpkeep and mint if time constraint is not met", async () => {
-        await expect(ballot.performUpkeep([])).to.be.revertedWith("The time to elapse hasn't been met.");
-    });
+      await expect(ballot.performUpkeep([])).to.be.revertedWith(
+        "The time to elapse hasn't been met."
+      )
+    })
 
     it("can performUpkeep and mint", async () => {
       let balance = (await ballot.balanceOf(accounts[0].address)).toString()
@@ -211,8 +208,7 @@ describe("Ballot", async () => {
       await expect(ballot.ownerOf(0)).to.be.revertedWith("ERC721: invalid token ID")
 
       // All these indexes start from 0
-      const proposalToVote = 0
-      const collectionSize = "3";
+      const proposalToVote = 1
 
       await vote(ballot, accounts[0], proposalToVote)
       const winnerIndex = await winningProposal(ballot)
@@ -222,13 +218,14 @@ describe("Ballot", async () => {
 
       const proposalVoteCount = 1
       const proposalFolderCid = ballotConfig.ipfsFolderCIDs[proposalToVote]
+      const collectionSize = ballotConfig.collectionsSize[proposalToVote].toString()
 
       const tx = await ballot.performUpkeep([])
-      await tx.wait();  
+      await tx.wait()
       await expect(tx)
         .to.emit(ballot, "UpkeepPerformed")
         .withArgs(proposalToVote, proposalVoteCount, proposalFolderCid)
-      
+
       const totalSupply = (await ballot.totalSupply()).toString()
       expect(totalSupply).to.equal(collectionSize)
 
@@ -236,7 +233,7 @@ describe("Ballot", async () => {
       expect(balance).to.equal(collectionSize)
       expect(await ballot.ownerOf(0)).to.be.equal(accounts[0].address)
 
-      const tokenURI = (await ballot.tokenURI(0)).toString();
+      const tokenURI = (await ballot.tokenURI(0)).toString()
       expect(tokenURI).to.equal(`ipfs://${proposalFolderCid}0.json`)
     })
   })
