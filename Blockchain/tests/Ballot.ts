@@ -201,13 +201,18 @@ describe("Ballot", async () => {
       expect(upkeepNeeded).to.equal(true)
     })
 
+    it("should not be able to call performUpkeep and mint if time constraint is not met", async () => {
+        await expect(ballot.performUpkeep([])).to.be.revertedWith("The time to elapse hasn't been met.");
+    });
+
     it("can performUpkeep and mint", async () => {
       let balance = (await ballot.balanceOf(accounts[0].address)).toString()
       expect(balance).to.equal("0")
       await expect(ballot.ownerOf(0)).to.be.revertedWith("ERC721: invalid token ID")
 
-      const proposalToVote = 1
-      const collectionSize = "1"
+      // All these indexes start from 0
+      const proposalToVote = 0
+      const collectionSize = "3";
 
       await vote(ballot, accounts[0], proposalToVote)
       const winnerIndex = await winningProposal(ballot)
@@ -219,10 +224,11 @@ describe("Ballot", async () => {
       const proposalFolderCid = ballotConfig.ipfsFolderCIDs[proposalToVote]
 
       const tx = await ballot.performUpkeep([])
+      await tx.wait();  
       await expect(tx)
         .to.emit(ballot, "UpkeepPerformed")
         .withArgs(proposalToVote, proposalVoteCount, proposalFolderCid)
-
+      
       const totalSupply = (await ballot.totalSupply()).toString()
       expect(totalSupply).to.equal(collectionSize)
 
@@ -230,8 +236,8 @@ describe("Ballot", async () => {
       expect(balance).to.equal(collectionSize)
       expect(await ballot.ownerOf(0)).to.be.equal(accounts[0].address)
 
-      const tokenURI = await ballot.tokenURI(0)
-      expect(tokenURI).to.equal(`ipfs://${proposalFolderCid}`)
+      const tokenURI = (await ballot.tokenURI(0)).toString();
+      expect(tokenURI).to.equal(`ipfs://${proposalFolderCid}0.json`)
     })
   })
 })

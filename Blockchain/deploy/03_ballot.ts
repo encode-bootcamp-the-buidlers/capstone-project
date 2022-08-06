@@ -15,7 +15,7 @@ const deployBallot: DeployFunction = async function (hre: HardhatRuntimeEnvironm
 
   const Ballot = await deploy("Ballot", {
     from: deployer,
-    args: [governanceToken.address, ballotConfig.ipfsFolderCIDs],
+    args: [governanceToken.address, ballotConfig.ipfsFolderCIDs, ballotConfig.collectionsSize],
     log: true,
     // we need to wait if on a live network so we can verify properly
     waitConfirmations: networkConfig[network.name].blockConfirmations || 1,
