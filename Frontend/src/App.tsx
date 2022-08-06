@@ -46,7 +46,7 @@ function App() {
                 <Box w={6}>
                   <Image src={vote} alt="logo" />
                 </Box>
-                <Link to="/">Vote</Link>
+                Vote
               </Flex>
             </Link>
             <Link to="/my-collections">
@@ -54,7 +54,7 @@ function App() {
                 <Box w={6}>
                   <Image src={mycollections} alt="logo" />
                 </Box>
-                <Link to="/">My Collections</Link>
+                My Collections
               </Flex>
             </Link>
           </Flex>
