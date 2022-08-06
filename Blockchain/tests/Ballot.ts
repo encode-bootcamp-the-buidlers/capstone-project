@@ -1,7 +1,9 @@
 import { expect } from "chai"
-import { deployments, ethers } from "hardhat"
-import { Ballot } from "../typechain-types/contracts/Ballot.sol"
 import { Signer } from "ethers"
+import { deployments, ethers } from "hardhat"
+import { ballotConfig } from "../hardhat-helper-config"
+import { Ballot } from "../typechain-types/contracts/Ballot.sol"
+import { increaseTime } from "../utils/test"
 
 const DEFAULT_PROPOSALS_INDEXES = [0, 1, 2, 3]
 
@@ -33,7 +35,7 @@ async function delegate(ballot: Ballot, signer: Signer, to: string) {
 }
 
 async function winningProposal(ballot: Ballot) {
-  await ballot.winningProposal()
+  return await ballot.winningProposal()
 }
 
 describe("Ballot", async () => {
@@ -83,7 +85,7 @@ describe("Ballot", async () => {
     it("can not give right to vote for someone that already has voting rights", async function () {
       const voterAddress = accounts[1].address
       await giveRightToVote(ballot, voterAddress)
-      await expect(giveRightToVote(ballot, voterAddress)).to.be.revertedWith("")
+      await expect(giveRightToVote(ballot, voterAddress)).to.be.reverted
     })
   })
 
@@ -123,7 +125,7 @@ describe("Ballot", async () => {
     describe("when an attacker interacts with the vote function in the contract", function () {
       describe("and the proposal does not exist", function () {
         it("should revert all the state changes", async function () {
-          await expect(vote(ballot, accounts[0], 1337)).to.be.revertedWith("")
+          await expect(vote(ballot, accounts[0], 1337)).to.be.reverted
         })
       })
     })
@@ -175,6 +177,61 @@ describe("Ballot", async () => {
         expect(winnerIndex).to.eq(proposal.index)
         expect(proposal.voteCount).to.eq(3)
       })
+    })
+  })
+
+  describe("keepers", () => {
+    it("doesn't trigger checkUpkeep when interval time not reached yet", async () => {
+      const [upkeepNeeded] = await ballot.checkUpkeep([])
+      expect(upkeepNeeded).to.equal(false)
+    })
+
+    it("doesn't trigger checkUpkeep when interval time not reached yet 2", async () => {
+      const seconds = 60
+      await increaseTime(seconds)
+
+      const [upkeepNeeded] = await ballot.checkUpkeep([])
+      expect(upkeepNeeded).to.equal(false)
+    })
+
+    it("triggers checkUpkeep when interval time is reached", async () => {
+      await increaseTime()
+
+      const [upkeepNeeded] = await ballot.checkUpkeep([])
+      expect(upkeepNeeded).to.equal(true)
+    })
+
+    it("can performUpkeep and mint", async () => {
+      let balance = (await ballot.balanceOf(accounts[0].address)).toString()
+      expect(balance).to.equal("0")
+      await expect(ballot.ownerOf(0)).to.be.revertedWith("ERC721: invalid token ID")
+
+      const proposalToVote = 1
+      const collectionSize = "1"
+
+      await vote(ballot, accounts[0], proposalToVote)
+      const winnerIndex = await winningProposal(ballot)
+      expect(winnerIndex.toString()).to.equal(proposalToVote.toString())
+
+      await increaseTime()
+
+      const proposalVoteCount = 1
+      const proposalFolderCid = ballotConfig.ipfsFolderCIDs[proposalToVote]
+
+      const tx = await ballot.performUpkeep([])
+      await expect(tx)
+        .to.emit(ballot, "UpkeepPerformed")
+        .withArgs(proposalToVote, proposalVoteCount, proposalFolderCid)
+
+      const totalSupply = (await ballot.totalSupply()).toString()
+      expect(totalSupply).to.equal(collectionSize)
+
+      balance = (await ballot.balanceOf(accounts[0].address)).toString()
+      expect(balance).to.equal(collectionSize)
+      expect(await ballot.ownerOf(0)).to.be.equal(accounts[0].address)
+
+      const tokenURI = await ballot.tokenURI(0)
+      expect(tokenURI).to.equal(`ipfs://${proposalFolderCid}`)
     })
   })
 })

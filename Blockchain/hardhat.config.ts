@@ -1,11 +1,7 @@
-import "@typechain/hardhat"
-import "@nomiclabs/hardhat-waffle"
-import "@nomiclabs/hardhat-etherscan"
-import "@nomiclabs/hardhat-ethers"
-import "hardhat-gas-reporter"
+import "@nomicfoundation/hardhat-toolbox"
 import "dotenv/config"
-import "solidity-coverage"
 import "hardhat-deploy"
+
 import { HardhatUserConfig } from "hardhat/config"
 
 const RINKEBY_RPC_URL = process.env.RINKEBY_RPC_URL
@@ -36,7 +32,7 @@ const config: HardhatUserConfig = {
       },
     },
   },
-  paths: { tests: 'tests' },
+  paths: { tests: "tests" },
   etherscan: {
     apiKey: ETHERSCAN_API_KEY,
   },
