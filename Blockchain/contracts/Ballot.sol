@@ -167,7 +167,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
 
   /// @dev Computes the winning proposal taking all
   /// previous votes into account.
-  function winningProposal() public view returns (uint256 winningProposal_) {
+  function getWinningProposal() public view returns (uint256 winningProposal_) {
     uint256 winningVoteCount = 0;
     // Gas optimization
     Proposal[] memory localProposals = proposals;
@@ -179,11 +179,11 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     }
   }
 
-  // Calls winningProposal() function to get the index
+  // Calls getWinningProposal() function to get the index
   // of the winner contained in the proposals array and then
   // returns the index of the winner
   function winnerIndex() external view returns (uint256 winnerIndex_) {
-    winnerIndex_ = proposals[winningProposal()].index;
+    winnerIndex_ = proposals[getWinningProposal()].index;
   }
 
   function votingPower() public view returns (uint256 votingPower_) {
@@ -207,7 +207,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     require((block.timestamp - lastTimeStamp) > interval, "The time to elapse hasn't been met.");
 
     lastTimeStamp = block.timestamp;
-    Proposal storage winningProposal = proposals[winningProposal()];
+    Proposal storage winningProposal = proposals[getWinningProposal()];
 
     winningProposal.active = false;
 

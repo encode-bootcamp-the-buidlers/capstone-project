@@ -33,7 +33,7 @@ async function delegate(ballot: Ballot, signer: Signer, to: string) {
 }
 
 async function winningProposal(ballot: Ballot) {
-  return await ballot.winningProposal()
+  return await ballot.getWinningProposal()
 }
 
 describe("Ballot", async () => {
