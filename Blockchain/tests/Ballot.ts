@@ -1,6 +1,6 @@
 import { expect } from "chai"
 import { Signer } from "ethers"
-import { deployments, ethers } from "hardhat"
+import { deployments, ethers, getNamedAccounts } from "hardhat"
 import { ballotConfig } from "../hardhat-helper-config"
 import { Ballot } from "../typechain-types/contracts/Ballot.sol"
 import { increaseTime } from "../utils/test"
@@ -46,6 +46,35 @@ describe("Ballot", async () => {
       expect(proposal.active).to.eq(true)
       expect(proposal.ipfsFolderCID).to.eq(ballotConfig.ipfsFolderCIDs[index])
     }
+  })
+
+  it("doesn't deploy if it has a cids and collection size mismatch", async () => {
+    const { deployer } = await getNamedAccounts()
+
+    const governanceTokenAddress = (await deployments.get("GovernanceToken")).address
+
+    let tx = deployments.deploy("Ballot", {
+      from: deployer,
+      args: [
+        governanceTokenAddress,
+        ballotConfig.ipfsFolderCIDs,
+        [...ballotConfig.collectionsSize, 5],
+      ],
+      log: true,
+    })
+
+    await expect(tx).to.be.reverted
+
+    tx = deployments.deploy("Ballot", {
+      from: deployer,
+      args: [
+        governanceTokenAddress,
+        [...ballotConfig.ipfsFolderCIDs, "Qxxxxxx"],
+        ballotConfig.collectionsSize,
+      ],
+      log: true,
+    })
+    await expect(tx).to.be.reverted
   })
 
   it("sets the deployer address as chairperson", async function () {
@@ -224,7 +253,7 @@ describe("Ballot", async () => {
       await tx.wait()
       await expect(tx)
         .to.emit(ballot, "UpkeepPerformed")
-        .withArgs(proposalToVote, proposalVoteCount, proposalFolderCid)
+        .withArgs(proposalToVote, proposalVoteCount, collectionSize, proposalFolderCid)
 
       const totalSupply = (await ballot.totalSupply()).toString()
       expect(totalSupply).to.equal(collectionSize)

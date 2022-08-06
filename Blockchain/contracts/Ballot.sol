@@ -11,6 +11,8 @@ interface IERC20Votes {
   function getPastVotes(address, uint256) external view returns (uint256);
 }
 
+error Ballot__Ipfs_CIDs_CollectionSize_Mismatch();
+
 contract Ballot is KeeperCompatibleInterface, NFTContract {
   using Strings for uint256;
 
@@ -49,6 +51,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   event UpkeepPerformed(
     uint256 winningProposal,
     uint256 winningProposalVoteCount,
+    uint256 winningProposalCollectionSize,
     string winningProposalIPFSFolderCID
   );
 
@@ -57,6 +60,9 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     string[] memory _ipfsFolderCIDs,
     uint256[] memory _collectionsSize
   ) {
+    if (_ipfsFolderCIDs.length != _collectionsSize.length)
+      revert Ballot__Ipfs_CIDs_CollectionSize_Mismatch();
+
     interval = 1 minutes; // for testing purposes
     lastTimeStamp = block.timestamp;
     chairperson = msg.sender;
@@ -187,24 +193,17 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   // TODO
   // Chainlink Keepers will check the winningProposal after the votingPeriod has passed
   /// @dev this method is called by the keepers to check if `performUpkeep` should be performed
-  function checkUpkeep(
-    bytes calldata
-  )
+  function checkUpkeep(bytes calldata)
     external
     view
     override
-    returns (
-      bool upkeepNeeded,
-      bytes memory
-    )
+    returns (bool upkeepNeeded, bytes memory)
   {
     upkeepNeeded = (block.timestamp - lastTimeStamp) > interval;
   }
 
   /// @dev this method is called by the keepers. It will mint the NFT collection (TODO)
-  function performUpkeep(
-    bytes calldata
-  ) external override {
+  function performUpkeep(bytes calldata) external override {
     require((block.timestamp - lastTimeStamp) > interval, "The time to elapse hasn't been met.");
 
     lastTimeStamp = block.timestamp;
@@ -223,6 +222,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     emit UpkeepPerformed(
       winningProposal.index,
       winningProposal.voteCount,
+      winningProposal.collectionSize,
       winningProposal.ipfsFolderCID
     );
   }

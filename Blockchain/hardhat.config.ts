@@ -18,7 +18,7 @@ const config: HardhatUserConfig = {
       chainId: 1337,
     },
     rinkeby: {
-      url: process.env.RINKEBY_RPC_URL,
+      url: RINKEBY_RPC_URL,
       accounts: [PRIVATE_KEY],
       chainId: 4,
     },
