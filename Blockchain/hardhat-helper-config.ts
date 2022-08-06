@@ -23,9 +23,9 @@ export const ballotConfig = {
   ipfsFolderCIDs: [
     // IMPORTANT! leave the trailing slash to indicate it's a folder
     "QmUMm4SdH9XVBvAhf2uAyx9tPJqQR4mgvYELzhn2qdS1mz/",
-    "QmdX9MsCLmuXMbViFWSjSL8Z77jTsvSaTbrvNVC7HVrpU6/",
-    "QmQQTL7npdih2MK8dT6QJV3jeYdx6Yzf7CWDu2xoJkoVYy/",
-    "QmRsaXDMBVvDg4GFyh4fSrWzwb97s2dCnZAPL4bMmpMZsk/",
+    "QmUP33aMa3dVhfqyqzYsmm8wG2hyZpGvwWwvDvGLNHCcA3/",
+    "QmS2Dt8HFyAQd2tQYEyMHjyVTJqdBxcuYXdLbU38Tkn7pV/",
+    "Qmez6fQ7pQ88MecRpiJSCcSF8ePdCtVPRLCB6kvxVXQgCp/",
   ],
   collectionsSize: [5, 6, 6, 8],
 }
