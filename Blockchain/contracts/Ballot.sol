@@ -37,6 +37,8 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   address public chairperson;
 
   mapping(address => Voter) public voters;
+  // mapping to link the proposalIndex to its voters
+  mapping(uint256 => address[]) public proposalVoters;
   mapping(address => uint256) public spentVotePower;
 
   Proposal[] public proposals;
@@ -163,6 +165,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     // TODO: we should burn the governance tokens once the participant has voted
     // For now, we simply set his weight/voting power to 0 (HACK)
     voters[msg.sender].weight = 0;
+    proposalVoters[proposal].push(msg.sender);
   }
 
   /// @dev Computes the winning proposal taking all
@@ -216,7 +219,10 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     for (uint256 i = 0; i < winningProposal.collectionSize; i++) {
       string memory suffix = string(abi.encodePacked(i.toString(), ".json"));
       string memory finalTokenUri = string(abi.encodePacked(prefix, suffix));
-      safeMint(chairperson, finalTokenUri);
+      // A loop inside a loop. We really need to test this one out
+      for (uint256 j = 0; j < proposalVoters[winningProposal.index].length; j++) {
+        safeMint(proposalVoters[winningProposal.index][j], finalTokenUri);
+      }
     }
 
     emit UpkeepPerformed(
