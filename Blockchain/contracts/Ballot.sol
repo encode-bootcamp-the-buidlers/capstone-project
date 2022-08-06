@@ -43,6 +43,12 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   uint256 public immutable interval;
   uint256 public lastTimeStamp;
 
+  event UpkeepPerformed(
+    uint256 winningProposal,
+    uint256 winningProposalVoteCount,
+    string winningProposalIPFSFolderCID
+  );
+
   constructor(address _voteToken, string[] memory _ipfsFolderCIDs) {
     interval = 1 days; // 6575;
     lastTimeStamp = block.timestamp;
@@ -194,6 +200,8 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
 
       string memory tokenUri = string(abi.encodePacked("ipfs://", winningProposal.ipfsFolderCID));
       safeMint(chairperson, tokenUri);
+
+      emit UpkeepPerformed(winningProposal.index, winningProposal.voteCount, winningProposal.ipfsFolderCID);
 
       // TODO. We need to store in the propsal struct what size the collection has
       // and then loop over it here, delete the 2 lines above then

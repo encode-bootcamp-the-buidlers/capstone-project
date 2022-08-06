@@ -1,8 +1,9 @@
 import { expect } from "chai"
-import { deployments, ethers } from "hardhat"
-import { Ballot } from "../typechain-types/contracts/Ballot.sol"
 import { Signer } from "ethers"
+import { deployments, ethers } from "hardhat"
 import { ballotConfig } from "../hardhat-helper-config"
+import { Ballot } from "../typechain-types/contracts/Ballot.sol"
+import { increaseTime } from "../utils/test"
 
 const DEFAULT_PROPOSALS_INDEXES = [0, 1, 2, 3]
 
@@ -213,7 +214,14 @@ describe("Ballot", async () => {
       expect(winnerIndex.toString()).to.equal(proposalToVote.toString())
 
       await increaseTime()
-      await ballot.performUpkeep([])
+
+      const proposalVoteCount = 1
+      const proposalFolderCid = ballotConfig.ipfsFolderCIDs[proposalToVote]
+
+      const tx = await ballot.performUpkeep([])
+      await expect(tx)
+        .to.emit(ballot, "UpkeepPerformed")
+        .withArgs(proposalToVote, proposalVoteCount, proposalFolderCid)
 
       const totalSupply = (await ballot.totalSupply()).toString()
       expect(totalSupply).to.equal(collectionSize)
@@ -223,19 +231,7 @@ describe("Ballot", async () => {
       expect(await ballot.ownerOf(0)).to.be.equal(accounts[0].address)
 
       const tokenURI = await ballot.tokenURI(0)
-      expect(tokenURI).to.equal(`ipfs://${ballotConfig.ipfsFolderCIDs[proposalToVote]}`)
+      expect(tokenURI).to.equal(`ipfs://${proposalFolderCid}`)
     })
   })
 })
-
-// async function getBlockInfo() {
-//   const blockNumber = await ethers.provider.getBlockNumber()
-//   const block = await ethers.provider.getBlock(blockNumber)
-
-//   return { blockNumber, block, blockTimestamp: block.timestamp }
-// }
-
-async function increaseTime(seconds = 60 * 60 * 24 + 1) {
-  await ethers.provider.send("evm_increaseTime", [seconds])
-  await ethers.provider.send("evm_mine", [])
-}
