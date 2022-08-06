@@ -11,7 +11,11 @@ interface IERC20Votes {
   function getPastVotes(address, uint256) external view returns (uint256);
 }
 
+error Ballot__Ipfs_CIDs_CollectionSize_Mismatch();
+
 contract Ballot is KeeperCompatibleInterface, NFTContract {
+  using Strings for uint256;
+
   // This declares a new complex type which will
   // be used for variables later.
   // It will represent a single voter.
@@ -26,6 +30,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   struct Proposal {
     uint256 index; // index for the NFT collection
     uint256 voteCount; // number of accumulated votes
+    uint256 collectionSize; // number of items in collection starting from 0
     bool active; // the proposal is still being voted on
     string ipfsFolderCID;
   }
@@ -46,11 +51,19 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   event UpkeepPerformed(
     uint256 winningProposal,
     uint256 winningProposalVoteCount,
+    uint256 winningProposalCollectionSize,
     string winningProposalIPFSFolderCID
   );
 
-  constructor(address _voteToken, string[] memory _ipfsFolderCIDs) {
-    interval = 1 days; // 6575;
+  constructor(
+    address _voteToken,
+    string[] memory _ipfsFolderCIDs,
+    uint256[] memory _collectionsSize
+  ) {
+    if (_ipfsFolderCIDs.length != _collectionsSize.length)
+      revert Ballot__Ipfs_CIDs_CollectionSize_Mismatch();
+
+    interval = 1 minutes; // for testing purposes
     lastTimeStamp = block.timestamp;
     chairperson = msg.sender;
     voters[chairperson].weight = 1;
@@ -60,7 +73,13 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
 
     for (uint256 i = 0; i < _ipfsFolderCIDs.length; i++) {
       proposals.push(
-        Proposal({index: i, voteCount: 0, active: true, ipfsFolderCID: _ipfsFolderCIDs[i]})
+        Proposal({
+          index: i,
+          voteCount: 0,
+          active: true,
+          ipfsFolderCID: _ipfsFolderCIDs[i],
+          collectionSize: _collectionsSize[i]
+        })
       );
     }
   }
@@ -148,7 +167,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
 
   /// @dev Computes the winning proposal taking all
   /// previous votes into account.
-  function winningProposal() public view returns (uint256 winningProposal_) {
+  function getWinningProposal() public view returns (uint256 winningProposal_) {
     uint256 winningVoteCount = 0;
     // Gas optimization
     Proposal[] memory localProposals = proposals;
@@ -160,11 +179,11 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     }
   }
 
-  // Calls winningProposal() function to get the index
+  // Calls getWinningProposal() function to get the index
   // of the winner contained in the proposals array and then
   // returns the index of the winner
   function winnerIndex() external view returns (uint256 winnerIndex_) {
-    winnerIndex_ = proposals[winningProposal()].index;
+    winnerIndex_ = proposals[getWinningProposal()].index;
   }
 
   function votingPower() public view returns (uint256 votingPower_) {
@@ -174,48 +193,37 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   // TODO
   // Chainlink Keepers will check the winningProposal after the votingPeriod has passed
   /// @dev this method is called by the keepers to check if `performUpkeep` should be performed
-  function checkUpkeep(
-    bytes calldata /* checkData */
-  )
+  function checkUpkeep(bytes calldata)
     external
     view
     override
-    returns (
-      bool upkeepNeeded,
-      bytes memory /* performData */
-    )
+    returns (bool upkeepNeeded, bytes memory)
   {
     upkeepNeeded = (block.timestamp - lastTimeStamp) > interval;
-    // We don't use the checkData in this example. The checkData is defined when the Upkeep was registered.
   }
 
   /// @dev this method is called by the keepers. It will mint the NFT collection (TODO)
-  function performUpkeep(
-    bytes calldata /* performData */
-  ) external override {
-    //We highly recommend revalidating the upkeep in the performUpkeep function
-    if ((block.timestamp - lastTimeStamp) > interval) {
-      lastTimeStamp = block.timestamp;
-      Proposal storage winningProposal = proposals[winningProposal()];
+  function performUpkeep(bytes calldata) external override {
+    require((block.timestamp - lastTimeStamp) > interval, "The time to elapse hasn't been met.");
 
-      string memory tokenUri = string(abi.encodePacked("ipfs://", winningProposal.ipfsFolderCID));
-      safeMint(chairperson, tokenUri);
+    lastTimeStamp = block.timestamp;
+    Proposal storage winningProposal = proposals[getWinningProposal()];
 
-      emit UpkeepPerformed(winningProposal.index, winningProposal.voteCount, winningProposal.ipfsFolderCID);
+    winningProposal.active = false;
 
-      // TODO. We need to store in the propsal struct what size the collection has
-      // and then loop over it here, delete the 2 lines above then
-      // for (uint256 i = 0; i < winningProposal.collectionSize; i++) {
-      //   string memory prefix = string(abi.encodePacked("ipfs://", winningProposal.ipfsFolderCID));
-      //   string memory suffix = string(abi.encodePacked("/", Strings.toString(i)));
-      //   string memory tokenUri = string(abi.encodePacked(prefix, suffix));
+    string memory prefix = string(abi.encodePacked("ipfs://", winningProposal.ipfsFolderCID));
 
-      //   safeMint(chairperson, tokenUri);
-      // }
-
-      // TODO. Need to pass the correct proposal index
-      proposals[0].active = false;
+    for (uint256 i = 0; i < winningProposal.collectionSize; i++) {
+      string memory suffix = string(abi.encodePacked(i.toString(), ".json"));
+      string memory finalTokenUri = string(abi.encodePacked(prefix, suffix));
+      safeMint(chairperson, finalTokenUri);
     }
-    // We don't use the performData in this example. The performData is generated by the Keeper's call to your checkUpkeep function
+
+    emit UpkeepPerformed(
+      winningProposal.index,
+      winningProposal.voteCount,
+      winningProposal.collectionSize,
+      winningProposal.ipfsFolderCID
+    );
   }
 }

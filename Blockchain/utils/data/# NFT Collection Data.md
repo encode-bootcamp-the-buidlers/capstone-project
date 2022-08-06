@@ -1,0 +1,124 @@
+# NFT Collection Data
+
+## 1st Collection
+
+### Folder
+
+QmUMm4SdH9XVBvAhf2uAyx9tPJqQR4mgvYELzhn2qdS1mz
+
+### Image Names
+
+Multiavatar-0d3ea896b185a709ea.png Multiavatar-9ae0fff72c5d9bba84.png Multiavatar-103f7ce10f7c76f74f.png Multiavatar-HesterVe.png Multiavatar-107c6896b227ddcf32.png
+
+### Data
+
+0
+Multiavatar-0d3ea896b185a709ea.png
+QmRoLZm3kyDNjK7joNQepwVm56URE9kWSWXYzckNjXPvGx
+1
+Multiavatar-103f7ce10f7c76f74f.png
+Qmcj35PdCz5FoZSLwFZKacezJmGQdMBPjoNxBeovFuGrk1
+2
+Multiavatar-107c6896b227ddcf32.png
+QmV6TRU7T1w3urmeFvry7S6XfEExiRCGGvsrjZEfxsKopT
+3
+Multiavatar-9ae0fff72c5d9bba84.png
+QmQLFPpMG1rdKpXEgn49GvEnwHLmpgQWNiEjW6h3dKJ6QU
+4
+Multiavatar-HesterVe.png
+QmfVGDguVa3VBeSCJjwVDjyoh5EwD7i6CvbB4UHHRBo1Pd
+
+## 2nd Collection
+
+### Folder
+
+QmdX9MsCLmuXMbViFWSjSL8Z77jTsvSaTbrvNVC7HVrpU6
+
+### Image Names
+
+Multiavatar-JoachimMolesworth.png Multiavatar-1328bda6c81b8cd83f.png Multiavatar-a861538467251d8d5d.png Multiavatar-21615b0f8908267ec2.png Multiavatar-c21f6fa3859fb20436.png Multiavatar-2e6dfe8193b214b2b8.png
+
+### Data
+
+0
+Multiavatar-1328bda6c81b8cd83f.png
+QmSarasRVaRZHE49xCvwzN4cjG4m18TL3JD4Yeto4ieXhc
+1
+Multiavatar-21615b0f8908267ec2.png
+QmfJuzD5ABPrLVwN1eFAtZEaHByAJ6pxWtBgckCfbu1iqf
+2
+Multiavatar-2e6dfe8193b214b2b8.png
+QmSKaPUS61nMiB5jySDUEDxCPpt1DSK1KNUgnxmHi2Xj9G
+3
+Multiavatar-JoachimMolesworth.png
+QmX434XD4eRWXUjM2Ctdu1wMDAdA3s1d8AzpY6Eh9unCjX
+4
+Multiavatar-a861538467251d8d5d.png
+QmQ5LSpzV8bcnhGAgg7c4YYNPjsjSWZgcHwoYZVgqegR8U
+5
+Multiavatar-c21f6fa3859fb20436.png
+QmS5gxySjx8q32E7pG47S17aCyGuLGbMa3PNqUw83CRy9u
+
+## 3rd Collection
+
+### Folder
+
+QmQQTL7npdih2MK8dT6QJV3jeYdx6Yzf7CWDu2xoJkoVYy
+
+### Image Names
+
+Multiavatar-c52e21b88d8ed2efc7.png Multiavatar-3f78be140dfa004bda.png Multiavatar-c76c7acffebe4aa7a6.png Multiavatar-404fd355d3189aae40.png Multiavatar-cc1054e2709a364f6b.png Multiavatar-50e88f5f153c91cf68.png
+
+### Data
+
+0
+Multiavatar-3f78be140dfa004bda.png
+QmT9yWVgmfXbrmVp1W7SQMe3NxVLMNyTq2wBLsnBTTaJFi
+1
+Multiavatar-404fd355d3189aae40.png
+QmPSEeFz4dQ3sYohggL6md38yQP452xPnw7EJvGeVMzTa5
+2
+Multiavatar-50e88f5f153c91cf68.png
+QmaFB13mm8APjBoASG4FKXxn6wKF6GTHtNhH1W9FveZjfT
+3
+Multiavatar-c52e21b88d8ed2efc7.png
+QmVLkQVREH8fkksnb57H3yUXfDGQZorbUUuFdD3TSVgQdz
+4
+Multiavatar-c76c7acffebe4aa7a6.png
+QmQxByxfYmcFs4GxdK1gWqDnky1Nc35keXDNe71uo1jw75
+5
+Multiavatar-cc1054e2709a364f6b.png
+QmPsAXHG4xRpCDCNQzDwwCQLN7MuqpfXWSNk9n21y65Uem
+
+## 4th Collection
+
+### Image Names
+
+Multiavatar-cc87b90fea11e42010.png Multiavatar-667943f4115fc865e1.png Multiavatar-d51c497d4534c9ed17.png Multiavatar-794849ba9eb6738bff.png Multiavatar-d7afe32fc98c6570fd.png Multiavatar-92f16dad86302c9ce1.png Multiavatar-e6a32e3e8840387da4.png Multiavatar-967e3ab0cb3f445abb.png
+
+### Data
+
+0
+Multiavatar-667943f4115fc865e1.png
+QmX1jFtWRsXkQFvcEMWQDSW5VMArjbR8uwqf7imMxbdmu9
+1
+Multiavatar-794849ba9eb6738bff.png
+QmQFXd1wdsPiskRXaNZyFYSdkFtFwJG4AgoqpR9zuRKtjV
+2
+Multiavatar-92f16dad86302c9ce1.png
+QmaVzazaKjeEg1VJvJ3JEoAdCxE9Bcyo19yEqhux7iQqLv
+3
+Multiavatar-967e3ab0cb3f445abb.png
+QmNN8kSRgRhXY3BeRgN1t1hy9C2y6143KDY7kVAD8kUB8H
+4
+Multiavatar-cc87b90fea11e42010.png
+QmTK9J5pDgMANZqWCbZYUDNh88tm3u93tFJkkZWRKwgT2T
+5
+Multiavatar-d51c497d4534c9ed17.png
+QmNvmXDYcwALxpJi3HwHNYyyY9HzpCmU2cY4A1dR2VXQ9v
+6
+Multiavatar-d7afe32fc98c6570fd.png
+QmbPQKxKPAoAVnG6au3XWmmuQipL8b4d6CkookoWYmZU9D
+7
+Multiavatar-e6a32e3e8840387da4.png
+QmfL3GfyLt11wyAXM5QjzzDGqCF51Zx9G5ZtFWJaaj3WGT

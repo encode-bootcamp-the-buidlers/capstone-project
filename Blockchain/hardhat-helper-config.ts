@@ -21,9 +21,11 @@ export const developmentChains = ["hardhat", "localhost"]
 
 export const ballotConfig = {
   ipfsFolderCIDs: [
-    "Qma67uxmsq8ZnXy36CYyAiA9wRpHKqXcgygGJhi93JMtzp",
-    "QmZwq3UFdWCvaTsZr9bpXcMuNPwJTVTRvN7Q3yF7i4ChRX",
-    "QmYJdoS1QnU3wDoDaVLVkKXjmHgV3bj5j7igTi6oqxHcaz",
-    "Qmae9doNZGn2EbGpKpgBiEU61HgBKNuYmU6uCuvKGSZGym",
+    // IMPORTANT! leave the trailing slash to indicate it's a folder
+    "QmUMm4SdH9XVBvAhf2uAyx9tPJqQR4mgvYELzhn2qdS1mz/",
+    "QmUP33aMa3dVhfqyqzYsmm8wG2hyZpGvwWwvDvGLNHCcA3/",
+    "QmS2Dt8HFyAQd2tQYEyMHjyVTJqdBxcuYXdLbU38Tkn7pV/",
+    "Qmez6fQ7pQ88MecRpiJSCcSF8ePdCtVPRLCB6kvxVXQgCp/",
   ],
+  collectionsSize: [5, 6, 6, 8],
 }
