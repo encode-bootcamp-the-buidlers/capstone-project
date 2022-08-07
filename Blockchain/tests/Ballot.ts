@@ -123,6 +123,16 @@ describe("Ballot", async () => {
       await expect(vote(ballot, accounts[0], 1)).to.be.revertedWith("Already voted.")
     })
 
+    it("should increase the proposal voters for the voted proposal", async () => {
+      const proposalVotersBefore = await ballot.getVotersForProposal(0)
+      expect(proposalVotersBefore.length).to.eq(0)
+
+      await vote(ballot, accounts[0], 0)
+
+      const proposalVotersAfter = await ballot.getVotersForProposal(0)
+      expect(proposalVotersAfter.length).to.eq(1)
+    })
+
     describe("when the voter interacts with the delegate function in the contract", function () {
       it("should has not already voted", async function () {
         await vote(ballot, accounts[0], 0)
@@ -210,7 +220,7 @@ describe("Ballot", async () => {
       expect(upkeepNeeded).to.equal(false)
     })
 
-    it("doesn't trigger checkUpkeep when interval time not reached yet 2", async () => {
+    it("doesn't trigger checkUpkeefp when interval time not reached yet 2", async () => {
       const seconds = (await ballot.interval()).toNumber() - 5 // 5 seconds before interval
       await increaseTime(seconds)
 
@@ -265,5 +275,37 @@ describe("Ballot", async () => {
       const tokenURI = (await ballot.tokenURI(0)).toString()
       expect(tokenURI).to.equal(`ipfs://${proposalFolderCid}0.json`)
     })
+  })
+
+  it("should mint the tokens to addresses that voted for the winning proposal", async () => {
+    await giveRightToVote(ballot, accounts[1].address)
+    await giveRightToVote(ballot, accounts[2].address)
+    await giveRightToVote(ballot, accounts[3].address)
+    await giveRightToVote(ballot, accounts[4].address)
+    
+    await vote(ballot, accounts[0], 1)
+    await vote(ballot, accounts[1], 1)
+    await vote(ballot, accounts[2], 1)
+    await vote(ballot, accounts[3], 2)
+    await vote(ballot, accounts[4], 2)
+
+    await increaseTime()
+
+    const tx = await ballot.performUpkeep([])
+    await tx.wait()
+    await expect(tx)
+      .to.emit(ballot, "UpkeepPerformed")
+      .withArgs(1, 3, 6, ballotConfig.ipfsFolderCIDs[1])
+
+    const balanceAccountZero = await ballot.balanceOf(accounts[0].address);
+    expect(balanceAccountZero).to.eq(6);  
+    const balanceAccountOne = await ballot.balanceOf(accounts[1].address);
+    expect(balanceAccountOne).to.eq(6);  
+    const balanceAccountTwo = await ballot.balanceOf(accounts[2].address);
+    expect(balanceAccountTwo).to.eq(6);  
+    const balanceAccountThree = await ballot.balanceOf(accounts[3].address);
+    expect(balanceAccountThree).to.eq(0);  
+    const balanceAccountFour = await ballot.balanceOf(accounts[4].address);
+    expect(balanceAccountFour).to.eq(0);  
   })
 })

@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import "hardhat/console.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
-// local contracts
+/// @dev local contracts
 import {NFTContract} from "./NFTContract.sol";
 
 interface IERC20Votes {
   function getPastVotes(address, uint256) external view returns (uint256);
 }
 
+/// @dev custom errors
 error Ballot__Ipfs_CIDs_CollectionSize_Mismatch();
 
 contract Ballot is KeeperCompatibleInterface, NFTContract {
@@ -37,6 +37,8 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   address public chairperson;
 
   mapping(address => Voter) public voters;
+  // mapping to link the proposalIndex to its voters
+  mapping(uint256 => address[]) public proposalVoters;
   mapping(address => uint256) public spentVotePower;
 
   Proposal[] public proposals;
@@ -163,6 +165,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     // TODO: we should burn the governance tokens once the participant has voted
     // For now, we simply set his weight/voting power to 0 (HACK)
     voters[msg.sender].weight = 0;
+    proposalVoters[proposal].push(msg.sender);
   }
 
   /// @dev Computes the winning proposal taking all
@@ -202,6 +205,10 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     upkeepNeeded = (block.timestamp - lastTimeStamp) > interval;
   }
 
+  function getVotersForProposal(uint256 index) public view returns(address[] memory) {
+    return proposalVoters[index];
+  }
+
   /// @dev this method is called by the keepers. It will mint the NFT collection (TODO)
   function performUpkeep(bytes calldata) external override {
     require((block.timestamp - lastTimeStamp) > interval, "The time to elapse hasn't been met.");
@@ -212,17 +219,23 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     winningProposal.active = false;
 
     string memory prefix = string(abi.encodePacked("ipfs://", winningProposal.ipfsFolderCID));
-
-    for (uint256 i = 0; i < winningProposal.collectionSize; i++) {
+    
+    uint256 collectionLength = winningProposal.collectionSize;
+    uint256 winningProposalIndex = winningProposal.index;
+    
+    for (uint256 i = 0; i < collectionLength; i++) {
       string memory suffix = string(abi.encodePacked(i.toString(), ".json"));
       string memory finalTokenUri = string(abi.encodePacked(prefix, suffix));
-      safeMint(chairperson, finalTokenUri);
+      // A loop inside a loop. We really need to test this one out
+      for (uint256 j = 0; j < proposalVoters[winningProposalIndex].length; j++) {
+        safeMint(proposalVoters[winningProposalIndex][j], finalTokenUri);
+      }
     }
 
     emit UpkeepPerformed(
-      winningProposal.index,
+      winningProposalIndex,
       winningProposal.voteCount,
-      winningProposal.collectionSize,
+      collectionLength,
       winningProposal.ipfsFolderCID
     );
   }
