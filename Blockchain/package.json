@@ -9,7 +9,9 @@
   "scripts": {
     "compile": "yarn hardhat compile",
     "node": "yarn hardhat node",
-    "test": "yarn hardhat test"
+    "test": "yarn hardhat test",
+    "verify:rinkeby": "yarn hardhat --network rinkeby etherscan-verify",
+    "deploy:rinkeby": "yarn hardhat --network rinkeby deploy"
   },
   "devDependencies": {
     "@chainlink/contracts": "^0.4.2",
