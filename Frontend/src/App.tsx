@@ -22,9 +22,9 @@ function App() {
 
   //functions
   const requestAccount = async () => {
-    console.log('Loging in...');
     if(window.ethereum) {
       try {
+        console.log('Loging in...');
         const accounts = await window.ethereum.request({
           method: "eth_requestAccounts",
         });
@@ -41,7 +41,6 @@ function App() {
   const connectWallet = async () => {
     if(typeof window.ethereum !== 'undefined') {
       await requestAccount();
-
       const provider = new ethers.providers.Web3Provider(window.ethereum);
     }
   }
@@ -68,7 +67,7 @@ function App() {
             <Link to="/">DAOs got talent</Link>
           </Flex>
 
-          {walletAddress ? <Box>Logged in as {walletAddress}</Box> : <Box onClick={connectWallet}>Wallet login</Box>}
+          {walletAddress !=="" ? <Box>Logged in as {walletAddress}</Box> : <Box onClick={connectWallet}>Wallet login</Box>}
         </Flex>
 
         {/* MAIN */}
