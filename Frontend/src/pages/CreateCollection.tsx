@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from "react";
 
 //Connectin to IPFS via infura
-const ipfsClient = require('ipfs-http-client')
-const ipfs = ipfsClient({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' }) // leaving out the arguments will default to these values
+//const ipfsClient = require('ipfs-http-client')
+//const ipfs = ipfsClient({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' }) // leaving out the arguments will default to these values
 
 export function CreateCollection() {
     //state variables
@@ -35,10 +35,10 @@ export function CreateCollection() {
     const createCollection = async () => {
         try {
             for(const file in files){
-                var decentralFile = await ipfs.add(file) // Adding file inside state variable 'buffer' to IPFS using the IPFS connection from above
+                //var decentralFile = await ipfs.add(file) // Adding file inside state variable 'buffer' to IPFS using the IPFS connection from above
                 //store the key (aka cid) to the files in IPFS on the ethereum blockchain
                     // to do
-                console.log("CID of IPFS file:", decentralFile.path)
+                //console.log("CID of IPFS file:", decentralFile.path)
             }
         } catch (error) {
             console.log(error)
