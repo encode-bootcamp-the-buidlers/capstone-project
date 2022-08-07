@@ -1,7 +1,8 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import { BrowserRouter as Router, Link } from "react-router-dom";
 import { Box, Flex, VStack, Image } from "@chakra-ui/react";
 import { Route, Routes } from "react-router";
+import { ethers } from 'ethers';
 
 import { Home } from "./pages/Home";
 import { MyCollections } from "./pages/MyCollections";
@@ -12,7 +13,40 @@ import mycollections from "./assets/mycollections.svg";
 import vote from "./assets/vote.svg";
 import "./App.css";
 
+
+
 function App() {
+
+  //state variables
+  const [walletAddress, setWalletAddress] = useState("");
+
+  //functions
+  const requestAccount = async () => {
+    console.log('Loging in...');
+    if(window.ethereum) {
+      try {
+        const accounts = await window.ethereum.request({
+          method: "eth_requestAccounts",
+        });
+        setWalletAddress(accounts[0]);
+      } catch (error) {
+        console.log('Error connecting...');
+      }
+    } else {
+      alert('Meta Mask extension not detected! Please add to engage with DAO.');
+    }
+  }
+
+  //create a provider to interact with a smart contract
+  const connectWallet = async () => {
+    if(typeof window.ethereum !== 'undefined') {
+      await requestAccount();
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+    }
+  }
+
+  //rendered component
   return (
     <Router>
       <VStack h="full">
@@ -34,7 +68,7 @@ function App() {
             <Link to="/">DAOs got talent</Link>
           </Flex>
 
-          <Box>Wallet login</Box>
+          {walletAddress ? <Box>Logged in as {walletAddress}</Box> : <Box onClick={connectWallet}>Wallet login</Box>}
         </Flex>
 
         {/* MAIN */}
