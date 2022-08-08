@@ -1,5 +1,8 @@
 import { Flex, Grid, GridItem, Image } from "@chakra-ui/react";
 import React from "react";
+
+import { Gallery } from "../components/Gallery";
+
 import A1 from "../assets/collections/A1.png";
 import A2 from "../assets/collections/A2.png";
 import A3 from "../assets/collections/A3.png";
@@ -22,55 +25,8 @@ export function MyCollections() {
         flexDir="column"
         gap={8}
       >
-        <Grid
-          templateRows="repeat(2, 1fr)"
-          templateColumns="repeat(4, 1fr)"
-          gap={4}
-          height="fit-content"
-          justifyContent="center"
-        >
-          <GridItem rowSpan={2} colSpan={2}>
-            <Image src={A1} />
-          </GridItem>
-          <GridItem colSpan={1}>
-            <Image src={A2} />
-          </GridItem>
-          <GridItem colSpan={1}>
-            <Image src={A3} />
-          </GridItem>
-          <GridItem colSpan={1}>
-            <Image src={A4} />
-          </GridItem>
-          <GridItem colSpan={1}>
-            <Image src={A5} />
-          </GridItem>
-        </Grid>
-
-        <Grid
-          templateRows="repeat(2, 1fr)"
-          templateColumns="repeat(4, 1fr)"
-          gap={4}
-          height="fit-content"
-          justifyContent="center"
-        >
-          <GridItem rowSpan={2} colSpan={2}>
-            <Image src={B1} />
-          </GridItem>
-          <GridItem colSpan={1}>
-            <Image src={B2} />
-          </GridItem>
-          <GridItem colSpan={1}>
-            <Image src={B3} />
-          </GridItem>
-          <GridItem colSpan={1}>
-            <Image src={B4} />
-          </GridItem>
-          <GridItem colSpan={1}>
-            <Image src={B5} />
-          </GridItem>
-        </Grid>
-
-        <Flex></Flex>
+        <Gallery images={[A1, A2, A3, A4, A5]} />
+        <Gallery images={[B1, B2, B3, B4, B5]} />
       </Flex>
     </Flex>
   );
