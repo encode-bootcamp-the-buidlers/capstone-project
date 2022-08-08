@@ -4,6 +4,7 @@ pragma solidity ^0.8.9;
 import "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 /// @dev local contracts
+import {GovernanceToken} from "./GovernanceToken.sol";
 import {NFTContract} from "./NFTContract.sol";
 
 interface IERC20Votes {
@@ -22,7 +23,6 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   struct Voter {
     bool voted; // if true, that person already voted
     address delegate; // person delegated to
-    uint256 weight; // weight is accumulated by delegation
     uint256 vote; // index of the voted proposal
   }
 
@@ -48,7 +48,9 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
    * Use an interval in seconds and a timestamp to slow execution of Upkeep
    */
   uint256 public immutable interval;
+  uint256 public immutable initialSupply = 1000;
   uint256 public lastTimeStamp;
+  GovernanceToken public governanceTokenContract;
 
   event UpkeepPerformed(
     uint256 winningProposal,
@@ -67,9 +69,9 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
 
     interval = 1 minutes; // for testing purposes
     lastTimeStamp = block.timestamp;
-    chairperson = msg.sender;
-    voters[chairperson].weight = 1;
-
+    governanceTokenContract = GovernanceToken(_voteToken);
+    // mint governance tokens for the chaiperson
+    governanceTokenContract.mint(msg.sender, initialSupply);
     voteToken = IERC20Votes(_voteToken);
     referenceBlock = block.number;
 
@@ -86,27 +88,14 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     }
   }
 
-  // Give `voter` the right to vote on this ballot.
-  // May only be called by `chairperson`.
-  function giveRightToVote(address voter) external {
-    // If the first argument of `require` evaluates
-    // to `false`, execution terminates and all
-    // changes to the state and to Ether balances
-    // are reverted.
-    // This used to consume all gas in old EVM versions, but
-    // not anymore.
-    // It is often a good idea to use `require` to check if
-    // functions are called correctly.
-    // As a second argument, you can also provide an
-    // explanation about what went wrong.
-    require(msg.sender == chairperson, "Only chairperson can give right to vote.");
-    require(!voters[voter].voted, "The voter already voted.");
-    require(voters[voter].weight == 0);
-    voters[voter].weight = 1;
+  // Give `voter` the right to vote on this ballot by sending them governance tokens
+  function giveRightToVote(address voter, uint256 amount) public {
+    require(votingPower() > 0, "You need to have some governance tokens to send");
+    governanceTokenContract.transfer(voter, amount);
   }
 
-  /// Delegate your vote to the voter `to`.
-  function delegate(address to) external {
+  /// Delegate your vote to the voter `to` in `amount` of tokens we delegate.
+  function delegate(address to, uint256 amount) external {
     // assigns reference
     Voter storage sender = voters[msg.sender];
     require(!sender.voted, "You already voted.");
@@ -132,39 +121,34 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     // modifies `voters[msg.sender].voted`
     Voter storage delegate_ = voters[to];
 
-    // Voters cannot delegate to wallets that cannot vote.
-    require(delegate_.weight >= 1);
     sender.voted = true;
     sender.delegate = to;
     if (delegate_.voted) {
       // If the delegate already voted,
       // directly add to the number of votes
-      proposals[delegate_.vote].voteCount += sender.weight;
+      proposals[delegate_.vote].voteCount += votingPower();
     } else {
       // If the delegate did not vote yet,
       // add to her weight.
-      delegate_.weight += sender.weight;
+      giveRightToVote(to, amount);
     }
   }
 
   /// Give your vote (including votes delegated to you)
   /// to proposal `proposals[proposal].index`.
-  function vote(uint256 proposal) external {
+  function vote(uint256 proposal, uint256 amount) external {
     Voter storage sender = voters[msg.sender];
     require(proposals[proposal].active, "Proposal ended");
     require(!sender.voted, "Already voted.");
-    require(sender.weight != 0, "Has no right to vote");
-    spentVotePower[msg.sender] += voters[msg.sender].weight;
+    uint256 votingPowerAvailable = votingPower();
+    require(votingPowerAvailable >= amount, "Has not enough voting power");
+    spentVotePower[msg.sender] += amount;
+    proposals[proposal].voteCount += amount;
     sender.voted = true;
     sender.vote = proposal;
 
-    // If `proposal` is out of the range of the array,
-    // this will throw automatically and revert all
-    // changes.
-    proposals[proposal].voteCount += sender.weight;
-    // TODO: we should burn the governance tokens once the participant has voted
-    // For now, we simply set his weight/voting power to 0 (HACK)
-    voters[msg.sender].weight = 0;
+    // Burn the governance tokens once the participant has voted
+    governanceTokenContract.burn(msg.sender, amount);
     proposalVoters[proposal].push(msg.sender);
   }
 
@@ -190,6 +174,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   }
 
   function votingPower() public view returns (uint256 votingPower_) {
+    if (governanceTokenContract.balanceOf(msg.sender) == 0) return 0;
     votingPower_ = voteToken.getPastVotes(msg.sender, referenceBlock) - spentVotePower[msg.sender];
   }
 
@@ -205,7 +190,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     upkeepNeeded = (block.timestamp - lastTimeStamp) > interval;
   }
 
-  function getVotersForProposal(uint256 index) public view returns(address[] memory) {
+  function getVotersForProposal(uint256 index) public view returns (address[] memory) {
     return proposalVoters[index];
   }
 
@@ -219,10 +204,10 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     winningProposal.active = false;
 
     string memory prefix = string(abi.encodePacked("ipfs://", winningProposal.ipfsFolderCID));
-    
+
     uint256 collectionLength = winningProposal.collectionSize;
     uint256 winningProposalIndex = winningProposal.index;
-    
+
     for (uint256 i = 0; i < collectionLength; i++) {
       string memory suffix = string(abi.encodePacked(i.toString(), ".json"));
       string memory finalTokenUri = string(abi.encodePacked(prefix, suffix));

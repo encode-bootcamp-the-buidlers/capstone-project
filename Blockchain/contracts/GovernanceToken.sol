@@ -16,8 +16,12 @@ contract GovernanceToken is ERC20, ERC20Burnable, Ownable, ERC20Permit, ERC20Vot
     ERC20Permit(_name)
   {}
 
-  function mint(address to, uint256 amount) public onlyOwner {
+  function mint(address to, uint256 amount) public {
     _mint(to, amount);
+  }
+
+  function burn(address account, uint256 amount) public {
+    _burn(account, amount);
   }
 
   function _afterTokenTransfer(

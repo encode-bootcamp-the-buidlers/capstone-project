@@ -12,7 +12,11 @@ async function main() {
   if (!proposalIndex) {
     throw new Error("Proposal index needs to be specified.")
   }
-  const network = process.argv[4] || "localhost"
+  const amount = process.argv[4]
+  if (!proposalIndex) {
+    throw new Error("Amount to vote with needs to be specified.")
+  }
+  const network = process.argv[5] || "localhost"
 
   const wallet = getWallet()
 
@@ -24,7 +28,7 @@ async function main() {
   console.log(
     `Casting vote on proposal with index : ${proposalIndex}, current vote count : ${currentProposal.voteCount}`
   )
-  const tx = await ballotContract.vote(proposalIndex)
+  const tx = await ballotContract.vote(proposalIndex, amount)
   console.log("Awaiting confirmations")
   await tx.wait()
   console.log("Fetching updated data for new proposal")
