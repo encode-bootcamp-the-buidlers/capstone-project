@@ -48,7 +48,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
    * Use an interval in seconds and a timestamp to slow execution of Upkeep
    */
   uint256 public immutable interval;
-  uint256 public immutable initialSupply = 1000;
+  uint256 public immutable ethereumBase = 10**18;
   uint256 public lastTimeStamp;
   GovernanceToken public governanceTokenContract;
 
@@ -71,7 +71,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     lastTimeStamp = block.timestamp;
     governanceTokenContract = GovernanceToken(_voteToken);
     // mint governance tokens for the chaiperson
-    governanceTokenContract.mint(msg.sender, initialSupply);
+    governanceTokenContract.mint(msg.sender, 1000 * ethereumBase);
     voteToken = IERC20Votes(_voteToken);
     referenceBlock = block.number;
 
@@ -91,7 +91,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   // Give `voter` the right to vote on this ballot by sending them governance tokens
   function giveRightToVote(address voter, uint256 amount) public {
     require(votingPower() > 0, "You need to have some governance tokens to send");
-    governanceTokenContract.transfer(voter, amount);
+    governanceTokenContract.transfer(voter, amount * ethereumBase);
   }
 
   /// Delegate your vote to the voter `to` in `amount` of tokens we delegate.
@@ -130,7 +130,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     } else {
       // If the delegate did not vote yet,
       // add to her weight.
-      giveRightToVote(to, amount);
+      giveRightToVote(to, amount * ethereumBase);
     }
   }
 
@@ -141,8 +141,9 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     require(proposals[proposal].active, "Proposal voting period ended");
     require(!sender.voted, "Already voted.");
     uint256 votingPowerAvailable = votingPower();
-    require(votingPowerAvailable >= amount, "Has not enough voting power");
-    spentVotePower[msg.sender] += amount;
+    uint256 votingPowerUsed = amount * ethereumBase;
+    require(votingPowerAvailable >= votingPowerUsed, "Has not enough voting power");
+    spentVotePower[msg.sender] += votingPowerUsed;
     proposals[proposal].voteCount += amount;
     sender.voted = true;
     sender.vote = proposal;
@@ -173,6 +174,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     winnerIndex_ = proposals[getWinningProposal()].index;
   }
 
+  /// @dev the voting power has 18 decimal units
   function votingPower() public view returns (uint256 votingPower_) {
     if (governanceTokenContract.balanceOf(msg.sender) == 0) return 0;
     votingPower_ = voteToken.getPastVotes(msg.sender, referenceBlock) - spentVotePower[msg.sender];
