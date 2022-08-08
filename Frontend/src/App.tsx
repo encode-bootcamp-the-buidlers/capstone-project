@@ -1,6 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Link } from "react-router-dom";
-import { Box, Flex, VStack, Image } from "@chakra-ui/react";
+import { Box, Flex, VStack, Image, Divider } from "@chakra-ui/react";
 import { Route, Routes } from "react-router";
 
 import { Home } from "./pages/Home";
@@ -40,7 +40,7 @@ function App() {
         {/* MAIN */}
         <Flex w="full" h="full" px={8} pt={8}>
           {/* NAVIGATION */}
-          <Flex w={48} h="full" flexDir="column" gap={6}>
+          <Flex w={60} h="full" flexDir="column" gap={6}>
             <Link to="/vote">
               <Flex alignItems="center" gap={4}>
                 <Box w={6}>
@@ -58,6 +58,7 @@ function App() {
               </Flex>
             </Link>
           </Flex>
+          <Box mr={10} h="90%"><Divider orientation="vertical" /></Box>
 
           {/* CONTENT */}
           <Flex w="full" h="full" justifyContent="center">
