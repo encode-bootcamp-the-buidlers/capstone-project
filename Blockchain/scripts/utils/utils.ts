@@ -1,4 +1,5 @@
 import { ethers } from "ethers"
+import "dotenv/config"
 
 function getWallet(): ethers.Wallet {
   // This key is already public on Herong's Tutorial Examples - v1.03, by Dr. Herong Yang
@@ -27,7 +28,9 @@ function getSignerProvider(
   if (network === "localhost") {
     provider = new ethers.providers.JsonRpcProvider()
   } else {
-    provider = ethers.providers.getDefaultProvider(network)
+    provider = ethers.providers.getDefaultProvider(network, {
+      etherscan: process.env.ETHERSCAN_API_KEY,
+    })
   }
   const signer = wallet.connect(provider)
 
