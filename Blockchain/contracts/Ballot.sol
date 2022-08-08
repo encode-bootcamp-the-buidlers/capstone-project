@@ -151,7 +151,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   /// to proposal `proposals[proposal].index`.
   function vote(uint256 proposal) external {
     Voter storage sender = voters[msg.sender];
-    require(proposals[proposal].active, "Proposal ended");
+    require(proposals[proposal].active, "Proposal voting period ended");
     require(!sender.voted, "Already voted.");
     require(sender.weight != 0, "Has no right to vote");
     spentVotePower[msg.sender] += voters[msg.sender].weight;
@@ -205,7 +205,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     upkeepNeeded = (block.timestamp - lastTimeStamp) > interval;
   }
 
-  function getVotersForProposal(uint256 index) public view returns(address[] memory) {
+  function getVotersForProposal(uint256 index) public view returns (address[] memory) {
     return proposalVoters[index];
   }
 
@@ -216,17 +216,16 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     lastTimeStamp = block.timestamp;
     Proposal storage winningProposal = proposals[getWinningProposal()];
 
-    winningProposal.active = false;
-
     string memory prefix = string(abi.encodePacked("ipfs://", winningProposal.ipfsFolderCID));
-    
+
     uint256 collectionLength = winningProposal.collectionSize;
     uint256 winningProposalIndex = winningProposal.index;
-    
+    // Close voting period for the winning proposal
+    proposals[winningProposalIndex].active = false;
+
     for (uint256 i = 0; i < collectionLength; i++) {
       string memory suffix = string(abi.encodePacked(i.toString(), ".json"));
       string memory finalTokenUri = string(abi.encodePacked(prefix, suffix));
-      // A loop inside a loop. We really need to test this one out
       for (uint256 j = 0; j < proposalVoters[winningProposalIndex].length; j++) {
         safeMint(proposalVoters[winningProposalIndex][j], finalTokenUri);
       }
