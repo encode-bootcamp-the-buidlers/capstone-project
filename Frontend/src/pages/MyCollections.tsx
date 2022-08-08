@@ -25,8 +25,8 @@ export function MyCollections() {
         flexDir="column"
         gap={8}
       >
-        <Gallery images={[A1, A2, A3, A4, A5]} />
-        <Gallery images={[B1, B2, B3, B4, B5]} />
+        <Gallery images={[A1, A2, A3, A4, A5]} artistName="T" percent={67} />
+        <Gallery images={[B1, B2, B3, B4, B5]} artistName="K" percent={43} />
       </Flex>
     </Flex>
   );
