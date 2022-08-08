@@ -257,8 +257,4 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     keeperRegistryAddress = _keeperRegistryAddress;
     _grantRole(MINTER_ROLE, keeperRegistryAddress);
   }
-
-  function getKeeperRegistryAddress() external view returns (address _keeperRegistryAddress) {
-    return keeperRegistryAddress;
-  }
 }
