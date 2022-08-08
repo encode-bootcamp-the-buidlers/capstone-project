@@ -1,18 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
+import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 /// @title Goat nft collection
 /// @author The Buidlers
 /// @notice This collection is part of a student homework project and must be treated as such.
 /// @dev This smart contract was created with OpenZeppelin's wizard: https://docs.openzeppelin.com/contracts/4.x/wizard
-contract NFTContract is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Burnable, Ownable {
+contract NFTContract is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Burnable, AccessControl {
+  bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
   /**
    * @dev The NFTContract inherits from multiple ERC interfaces
    * ERC721:           The ERC non-fungible token standard, https://eips.ethereum.org/EIPS/eip-721
@@ -26,11 +27,14 @@ contract NFTContract is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Burnab
 
   Counters.Counter private _tokenIdCounter;
 
-  constructor() ERC721("NFTContract", "NFT") {}
+  constructor() ERC721("NFTContract", "NFT") {
+    _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    _grantRole(MINTER_ROLE, msg.sender);
+  }
 
   /// @dev safeMint mints an NFT token to the requesting user's address
   /// @param to mint to address, @param uri is the ipfs location of metadata of the minted NFT
-  function safeMint(address to, string memory uri) public onlyOwner {
+  function safeMint(address to, string memory uri) public onlyRole(MINTER_ROLE) {
     uint256 tokenId = _tokenIdCounter.current();
     _tokenIdCounter.increment();
     _safeMint(to, tokenId);
@@ -69,7 +73,7 @@ contract NFTContract is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Burnab
   function supportsInterface(bytes4 interfaceId)
     public
     view
-    override(ERC721, ERC721Enumerable)
+    override(ERC721, ERC721Enumerable, AccessControl)
     returns (bool)
   {
     return super.supportsInterface(interfaceId);

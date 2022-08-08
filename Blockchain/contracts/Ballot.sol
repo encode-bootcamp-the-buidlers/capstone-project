@@ -12,6 +12,7 @@ interface IERC20Votes {
 
 /// @dev custom errors
 error Ballot__Ipfs_CIDs_CollectionSize_Mismatch();
+error OnlyKeeperRegistry();
 
 contract Ballot is KeeperCompatibleInterface, NFTContract {
   using Strings for uint256;
@@ -56,6 +57,15 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     uint256 winningProposalCollectionSize,
     string winningProposalIPFSFolderCID
   );
+
+  address private keeperRegistryAddress;
+
+  modifier onlyKeeperRegistry() {
+    if (msg.sender != keeperRegistryAddress) {
+      revert OnlyKeeperRegistry();
+    }
+    _;
+  }
 
   constructor(
     address _voteToken,
@@ -210,7 +220,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   }
 
   /// @dev this method is called by the keepers. It will mint the NFT collection (TODO)
-  function performUpkeep(bytes calldata) external override {
+  function performUpkeep(bytes calldata) external override onlyKeeperRegistry {
     require((block.timestamp - lastTimeStamp) > interval, "The time to elapse hasn't been met.");
 
     lastTimeStamp = block.timestamp;
@@ -237,5 +247,14 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
       collectionLength,
       winningProposal.ipfsFolderCID
     );
+  }
+
+  function setKeeperRegistryAddress(address _keeperRegistryAddress)
+    public
+    onlyRole(DEFAULT_ADMIN_ROLE)
+  {
+    require(_keeperRegistryAddress != address(0));
+    keeperRegistryAddress = _keeperRegistryAddress;
+    _grantRole(MINTER_ROLE, keeperRegistryAddress);
   }
 }
