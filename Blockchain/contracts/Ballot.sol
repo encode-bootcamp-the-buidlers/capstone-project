@@ -34,7 +34,6 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     bool active; // the proposal is still being voted on
     string ipfsFolderCID;
   }
-  address public chairperson;
 
   mapping(address => Voter) public voters;
   // mapping to link the proposalIndex to its voters
@@ -90,7 +89,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   // Give `voter` the right to vote on this ballot by sending them governance tokens
   function giveRightToVote(address voter, uint256 amount) public {
     require(votingPower() > 0, "You need to have some governance tokens to send");
-    governanceTokenContract.transfer(voter, amount * ethereumBase);
+    governanceTokenContract.transfer(voter, amount);
   }
 
   /// Delegate your vote to the voter `to` in `amount` of tokens we delegate.
@@ -129,7 +128,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     } else {
       // If the delegate did not vote yet,
       // add to her weight.
-      giveRightToVote(to, amount * ethereumBase);
+      giveRightToVote(to, amount);
     }
   }
 
