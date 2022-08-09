@@ -86,57 +86,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     }
   }
 
-  // Give `voter` the right to vote on this ballot by sending them governance tokens
-  function giveRightToVote(address voter, uint256 amount) public {
-    require(votingPower() > 0, "You need to have some governance tokens to send");
-    // HACK: since transferFrom works with allowance and the approve method doesn't help here
-    // we simply burn the tokens for the caller and mint them for the voter
-    governanceTokenContract.burn(msg.sender, amount * ethereumBase);
-    governanceTokenContract.mint(voter, amount * ethereumBase);
-  }
-
-  /// Delegate your vote to the voter `to` in `amount` of tokens we delegate.
-  function delegate(address to, uint256 amount) external {
-    // assigns reference
-    Voter storage sender = voters[msg.sender];
-    require(!sender.voted, "You already voted.");
-
-    require(to != msg.sender, "Self-delegation is disallowed.");
-
-    // Forward the delegation as long as
-    // `to` also delegated.
-    // In general, such loops are very dangerous,
-    // because if they run too long, they might
-    // need more gas than is available in a block.
-    // In this case, the delegation will not be executed,
-    // but in other situations, such loops might
-    // cause a contract to get "stuck" completely.
-    while (voters[to].delegate != address(0)) {
-      to = voters[to].delegate;
-
-      // We found a loop in the delegation, not allowed.
-      require(to != msg.sender, "Found loop in delegation.");
-    }
-
-    // Since `sender` is a reference, this
-    // modifies `voters[msg.sender].voted`
-    Voter storage delegate_ = voters[to];
-
-    sender.voted = true;
-    sender.delegate = to;
-    if (delegate_.voted) {
-      // If the delegate already voted,
-      // directly add to the number of votes
-      proposals[delegate_.vote].voteCount += votingPower();
-    } else {
-      // If the delegate did not vote yet,
-      // add to her weight.
-      giveRightToVote(to, amount);
-    }
-  }
-
-  /// Give your vote (including votes delegated to you)
-  /// to proposal `proposals[proposal].index`.
+  /// Give your vote to proposal `proposals[proposal].index`.
   function vote(uint256 proposal, uint256 amount) external {
     Voter storage sender = voters[msg.sender];
     require(proposals[proposal].active, "Proposal voting period ended");
