@@ -1,8 +1,8 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Link } from "react-router-dom";
 import { Box, Flex, VStack, Image, Divider } from "@chakra-ui/react";
 import { Route, Routes } from "react-router";
-import { ethers } from 'ethers';
+import { ethers } from "ethers";
 
 import { Home } from "./pages/Home";
 import { MyCollections } from "./pages/MyCollections";
@@ -13,37 +13,34 @@ import mycollections from "./assets/mycollections.svg";
 import vote from "./assets/vote.svg";
 import "./App.css";
 
-
-
 function App() {
-
   //state variables
   const [walletAddress, setWalletAddress] = useState("");
 
   //functions
   const requestAccount = async () => {
-    if(window.ethereum) {
+    if (window.ethereum) {
       try {
-        console.log('Loging in...');
+        console.log("Loging in...");
         const accounts = await window.ethereum.request({
           method: "eth_requestAccounts",
         });
         setWalletAddress(accounts[0]);
       } catch (error) {
-        console.log('Error connecting...');
+        console.log("Error connecting...");
       }
     } else {
-      alert('Meta Mask extension not detected! Please add to engage with DAO.');
+      alert("Meta Mask extension not detected! Please add to engage with DAO.");
     }
-  }
+  };
 
   //create a provider to interact with a smart contract
   const connectWallet = async () => {
-    if(typeof window.ethereum !== 'undefined') {
+    if (typeof window.ethereum !== "undefined") {
       await requestAccount();
       const provider = new ethers.providers.Web3Provider(window.ethereum);
     }
-  }
+  };
 
   //rendered component
   return (
@@ -53,7 +50,7 @@ function App() {
         <Flex
           w="100%"
           justify="space-between"
-          h={20}
+          h="60px"
           zIndex={1000}
           px={8}
           background="linear-gradient(rgba(255, 255, 255, 0.1), transparent)"
@@ -67,11 +64,15 @@ function App() {
             <Link to="/">DAOs got talent</Link>
           </Flex>
 
-          {walletAddress !=="" ? <Box>Logged in as {walletAddress}</Box> : <Box onClick={connectWallet}>Wallet login</Box>}
+          {walletAddress !== "" ? (
+            <Box>Logged in as {walletAddress}</Box>
+          ) : (
+            <Box onClick={connectWallet}>Wallet login</Box>
+          )}
         </Flex>
 
         {/* MAIN */}
-        <Flex w="full" h="full" px={8} pt={8}>
+        <Flex w="full" h="calc(100% - 60px)" px={8} pt={8}>
           {/* NAVIGATION */}
           <Flex w={60} h="full" flexDir="column" gap={6}>
             <Link to="/vote">
@@ -91,7 +92,9 @@ function App() {
               </Flex>
             </Link>
           </Flex>
-          <Box mr={10} h="90%"><Divider orientation="vertical" /></Box>
+          <Box mr={10} h="90%">
+            <Divider orientation="vertical" />
+          </Box>
 
           {/* CONTENT */}
           <Flex w="full" h="full" justifyContent="center">
