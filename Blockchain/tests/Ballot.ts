@@ -3,9 +3,11 @@ import { Signer } from "ethers"
 import { deployments, ethers, getNamedAccounts } from "hardhat"
 import { ballotConfig } from "../hardhat-helper-config"
 import { Ballot } from "../typechain-types/contracts/Ballot.sol"
+import { GovernanceToken } from "../typechain-types/contracts/GovernanceToken"
 import { increaseTime } from "../utils/test"
 
 let ballot: Ballot
+let tokenContract: any
 let accounts: any[]
 
 beforeEach(async () => {
@@ -13,22 +15,14 @@ beforeEach(async () => {
   accounts = await ethers.getSigners()
 
   ballot = await ethers.getContract("Ballot")
+  const tokenContractFactory = await ethers.getContractFactory("GovernanceToken")
+  tokenContract = await tokenContractFactory.deploy("DAO got talent", "DAOGT")
+  await tokenContract.deployed()
+  await tokenContract.connect(accounts[0]).mint(accounts[0].address, 1000)
 })
 
-async function giveRightToVote(ballot: Ballot, voterAddress: any, signer?: Signer) {
-  const tx = signer
-    ? await ballot.connect(signer).giveRightToVote(voterAddress)
-    : await ballot.giveRightToVote(voterAddress)
-  await tx.wait()
-}
-
-async function vote(ballot: Ballot, signer: Signer, proposal: number) {
-  const tx = await ballot.connect(signer).vote(proposal)
-  await tx.wait()
-}
-
-async function delegate(ballot: Ballot, signer: Signer, to: string) {
-  const tx = await ballot.connect(signer).delegate(to)
+async function vote(ballot: Ballot, signer: Signer, proposal: number, amount?: number) {
+  const tx = await ballot.connect(signer).vote(proposal, amount || 10)
   await tx.wait()
 }
 
@@ -77,45 +71,9 @@ describe("Ballot", async () => {
     await expect(tx).to.be.reverted
   })
 
-  it("sets the deployer address as chairperson", async function () {
-    const chairperson = await ballot.chairperson()
-    const deployer = await ethers.getNamedSigner("deployer")
-    expect(chairperson).to.eq(deployer.address)
-  })
-
-  it("sets the voting weight for the chairperson as 1", async function () {
-    const chairpersonVoter = await ballot.voters(accounts[0].address)
-    expect(chairpersonVoter.weight.toNumber()).to.eq(1)
-  })
-
-  describe("when the chairperson interacts with the giveRightToVote function in the contract", function () {
-    it("gives right to vote for another address", async function () {
-      const voterAddress = accounts[1].address
-      const tx = await ballot.giveRightToVote(voterAddress)
-      await tx.wait()
-      const voter = await ballot.voters(voterAddress)
-      expect(voter.weight.toNumber()).to.eq(1)
-    })
-
-    it("can not give right to vote for someone that has voted", async function () {
-      const voterAddress = accounts[1].address
-      await giveRightToVote(ballot, voterAddress)
-      await ballot.connect(accounts[1]).vote(0)
-      await expect(giveRightToVote(ballot, voterAddress)).to.be.revertedWith(
-        "The voter already voted."
-      )
-    })
-
-    it("can not give right to vote for someone that already has voting rights", async function () {
-      const voterAddress = accounts[1].address
-      await giveRightToVote(ballot, voterAddress)
-      await expect(giveRightToVote(ballot, voterAddress)).to.be.reverted
-    })
-  })
-
   describe("when the voter interacts with the vote function in the contract", function () {
-    it("should has the right to vote", async function () {
-      await expect(vote(ballot, accounts[1], 0)).to.be.revertedWith("Has no right to vote")
+    it("shouldn't vote due to lack of tokens", async function () {
+      await expect(vote(ballot, accounts[1], 0)).to.be.revertedWith("Has not enough voting power")
     })
 
     it("should not have voted already", async function () {
@@ -133,44 +91,11 @@ describe("Ballot", async () => {
       expect(proposalVotersAfter.length).to.eq(1)
     })
 
-    describe("when the voter interacts with the delegate function in the contract", function () {
-      it("should has not already voted", async function () {
-        await vote(ballot, accounts[0], 0)
-        await expect(delegate(ballot, accounts[0], accounts[1].address)).to.be.revertedWith(
-          "You already voted."
-        )
-      })
-
-      it("can not self-delegate", async function () {
-        await expect(delegate(ballot, accounts[0], accounts[0].address)).to.be.revertedWith(
-          "Self-delegation is disallowed."
-        )
-      })
-    })
-
-    describe("when an attacker interacts with the giveRightToVote function in the contract", function () {
-      it("can not give voting rights", async function () {
-        await expect(giveRightToVote(ballot, accounts[2].address, accounts[1])).to.be.revertedWith(
-          "Only chairperson can give right to vote."
-        )
-      })
-    })
-
     describe("when an attacker interacts with the vote function in the contract", function () {
       describe("and the proposal does not exist", function () {
         it("should revert all the state changes", async function () {
           await expect(vote(ballot, accounts[0], 1337)).to.be.reverted
         })
-      })
-    })
-
-    describe("when an attacker interacts with the delegate function in the contract", function () {
-      it("can not produce loop in delegation", async function () {
-        await giveRightToVote(ballot, accounts[1].address)
-        await delegate(ballot, accounts[0], accounts[1].address)
-        await expect(delegate(ballot, accounts[1], accounts[0].address)).to.be.revertedWith(
-          "Found loop in delegation."
-        )
       })
     })
 
@@ -192,10 +117,10 @@ describe("Ballot", async () => {
 
     describe("when someone interacts with the winnerIndex function after 5 random votes are cast for the proposals", function () {
       it("should return the index of the proposal with highest votes count", async function () {
-        await giveRightToVote(ballot, accounts[1].address)
-        await giveRightToVote(ballot, accounts[2].address)
-        await giveRightToVote(ballot, accounts[3].address)
-        await giveRightToVote(ballot, accounts[4].address)
+        await tokenContract.connect(accounts[1]).mint(accounts[1].address, 100)
+        await tokenContract.connect(accounts[2]).mint(accounts[2].address, 100)
+        await tokenContract.connect(accounts[3]).mint(accounts[3].address, 100)
+        await tokenContract.connect(accounts[4]).mint(accounts[4].address, 100)
 
         // Proposal 2 should be the proposal with highest votes count
         await vote(ballot, accounts[0], 0)
@@ -278,11 +203,11 @@ describe("Ballot", async () => {
   })
 
   it("should mint the tokens to addresses that voted for the winning proposal", async () => {
-    await giveRightToVote(ballot, accounts[1].address)
-    await giveRightToVote(ballot, accounts[2].address)
-    await giveRightToVote(ballot, accounts[3].address)
-    await giveRightToVote(ballot, accounts[4].address)
-    
+    await tokenContract.connect(accounts[1]).mint(accounts[1].address, 100)
+    await tokenContract.connect(accounts[2]).mint(accounts[2].address, 100)
+    await tokenContract.connect(accounts[3]).mint(accounts[3].address, 100)
+    await tokenContract.connect(accounts[4]).mint(accounts[4].address, 100)
+
     await vote(ballot, accounts[0], 1)
     await vote(ballot, accounts[1], 1)
     await vote(ballot, accounts[2], 1)
@@ -297,15 +222,15 @@ describe("Ballot", async () => {
       .to.emit(ballot, "UpkeepPerformed")
       .withArgs(1, 3, 6, ballotConfig.ipfsFolderCIDs[1])
 
-    const balanceAccountZero = await ballot.balanceOf(accounts[0].address);
-    expect(balanceAccountZero).to.eq(6);  
-    const balanceAccountOne = await ballot.balanceOf(accounts[1].address);
-    expect(balanceAccountOne).to.eq(6);  
-    const balanceAccountTwo = await ballot.balanceOf(accounts[2].address);
-    expect(balanceAccountTwo).to.eq(6);  
-    const balanceAccountThree = await ballot.balanceOf(accounts[3].address);
-    expect(balanceAccountThree).to.eq(0);  
-    const balanceAccountFour = await ballot.balanceOf(accounts[4].address);
-    expect(balanceAccountFour).to.eq(0);  
+    const balanceAccountZero = await ballot.balanceOf(accounts[0].address)
+    expect(balanceAccountZero).to.eq(6)
+    const balanceAccountOne = await ballot.balanceOf(accounts[1].address)
+    expect(balanceAccountOne).to.eq(6)
+    const balanceAccountTwo = await ballot.balanceOf(accounts[2].address)
+    expect(balanceAccountTwo).to.eq(6)
+    const balanceAccountThree = await ballot.balanceOf(accounts[3].address)
+    expect(balanceAccountThree).to.eq(0)
+    const balanceAccountFour = await ballot.balanceOf(accounts[4].address)
+    expect(balanceAccountFour).to.eq(0)
   })
 })

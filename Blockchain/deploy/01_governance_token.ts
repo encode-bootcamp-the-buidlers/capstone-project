@@ -13,7 +13,7 @@ const deployGovernanceToken: DeployFunction = async function (hre: HardhatRuntim
   log("----------------------------------------------------")
   log("Deploying GovernanceToken and waiting for confirmations...")
 
-  const governanceTokenName = "DAO got talent "
+  const governanceTokenName = "DAO got talent"
   const governanceTokenSymbol = "DAOGT"
 
   const governanceToken = await deploy("GovernanceToken", {
