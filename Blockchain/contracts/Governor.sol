@@ -36,7 +36,9 @@ contract Governor is NFTContract {
       revert Governor__CurrentBallotNotFinished();
     }
 
-    pastBallots.push(address(ballot));
+    if (address(ballot) != address(0)) {
+      pastBallots.push(address(ballot));
+    }
 
     currentBallotId.increment(); // start at 1
 
