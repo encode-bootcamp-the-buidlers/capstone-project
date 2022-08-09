@@ -13,11 +13,17 @@ import mycollections from "./assets/mycollections.svg";
 import vote from "./assets/vote.svg";
 import "./App.css";
 
+//import contracts
+import DaoContract from "./contracts/daoContract.json"
+
 function App() {
   //state variables
   const [walletAddress, setWalletAddress] = useState("");
+  const [daoContract, setDaoContract] = useState(new ethers.Contract(ethers.constants.AddressZero, [])); //necessary init due to TS
 
   //functions
+
+  //facilitates login process
   const requestAccount = async () => {
     if (window.ethereum) {
       try {
@@ -34,11 +40,27 @@ function App() {
     }
   };
 
-  //create a provider to interact with a smart contract
+  //connect to smart contracts
+  const connectToContracts = async () => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    console.log("provider", provider)
+
+    const signer = provider.getSigner()
+    console.log("signer", signer)
+
+    const daoContract = new ethers.Contract(DaoContract.address, DaoContract.abi, signer)
+    setDaoContract(daoContract)
+    console.log("Dao contract", daoContract)
+
+    const totalSupply = await daoContract.totalSupply()
+    console.log("totalSupply", totalSupply) 
+  }
+
+  //triggers login and creates connection to dao contract
   const connectWallet = async () => {
     if (typeof window.ethereum !== "undefined") {
-      await requestAccount();
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await requestAccount(); // login
+      await connectToContracts() //connect to DAO contract
     }
   };
 
