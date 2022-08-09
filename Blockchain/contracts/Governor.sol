@@ -32,11 +32,13 @@ contract Governor is NFTContract {
   function createNewBallot(string[] memory _ipfsFolderCIDs, uint256[] memory _collectionsSize)
     public
   {
-    if (!ballot.hasVotingFinished()) {
+    bool hasBallot = address(ballot) != address(0);
+
+    if (hasBallot && !ballot.hasVotingFinished()) {
       revert Governor__CurrentBallotNotFinished();
     }
 
-    if (address(ballot) != address(0)) {
+    if (hasBallot) {
       pastBallots.push(address(ballot));
     }
 
