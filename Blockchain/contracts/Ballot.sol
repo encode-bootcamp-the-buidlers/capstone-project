@@ -176,7 +176,8 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
 
   /// @dev the voting power has 18 decimal units
   function votingPower() public view returns (uint256 votingPower_) {
-    votingPower_ = governanceTokenContract.balanceOf(msg.sender);
+    uint256 rawVotingPower = governanceTokenContract.balanceOf(msg.sender);
+    votingPower_ = rawVotingPower / 10**18;
   }
 
   // TODO
