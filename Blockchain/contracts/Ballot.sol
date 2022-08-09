@@ -89,7 +89,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   // Give `voter` the right to vote on this ballot by sending them governance tokens
   function giveRightToVote(address voter, uint256 amount) public {
     require(votingPower() > 0, "You need to have some governance tokens to send");
-    governanceTokenContract.transfer(voter, amount);
+    governanceTokenContract.transferFrom(msg.sender, voter, amount * ethereumBase);
   }
 
   /// Delegate your vote to the voter `to` in `amount` of tokens we delegate.
