@@ -39,7 +39,6 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   mapping(address => Voter) public voters;
   // mapping to link the proposalIndex to its voters
   mapping(uint256 => address[]) public proposalVoters;
-  mapping(address => uint256) public spentVotePower;
 
   Proposal[] public proposals;
   IERC20Votes public voteToken;
@@ -143,13 +142,12 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     uint256 votingPowerAvailable = votingPower();
     uint256 votingPowerUsed = amount * ethereumBase;
     require(votingPowerAvailable >= votingPowerUsed, "Has not enough voting power");
-    spentVotePower[msg.sender] += votingPowerUsed;
     proposals[proposal].voteCount += amount;
     sender.voted = true;
     sender.vote = proposal;
 
     // Burn the governance tokens once the participant has voted
-    governanceTokenContract.burn(msg.sender, amount);
+    governanceTokenContract.burn(msg.sender, votingPowerUsed);
     proposalVoters[proposal].push(msg.sender);
   }
 
@@ -176,8 +174,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
 
   /// @dev the voting power has 18 decimal units
   function votingPower() public view returns (uint256 votingPower_) {
-    if (governanceTokenContract.balanceOf(msg.sender) == 0) return 0;
-    votingPower_ = voteToken.getPastVotes(msg.sender, referenceBlock) - spentVotePower[msg.sender];
+    votingPower_ = governanceTokenContract.balanceOf(msg.sender);
   }
 
   // TODO
