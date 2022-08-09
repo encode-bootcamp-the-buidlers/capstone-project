@@ -28,4 +28,5 @@ export const ballotConfig = {
     "Qmez6fQ7pQ88MecRpiJSCcSF8ePdCtVPRLCB6kvxVXQgCp/",
   ],
   collectionsSize: [5, 6, 6, 8],
+  quorum: 3,
 }
