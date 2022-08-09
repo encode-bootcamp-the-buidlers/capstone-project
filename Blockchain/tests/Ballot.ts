@@ -20,7 +20,8 @@ beforeEach(async () => {
   ballot = await ballotContractFactory.deploy(
     tokenContract.address,
     ballotConfig.ipfsFolderCIDs,
-    ballotConfig.collectionsSize
+    ballotConfig.collectionsSize,
+    ballotConfig.quorum
   )
   await tokenContract.deployed()
   await ballot.deployed()
@@ -77,12 +78,6 @@ describe("Ballot", async () => {
         log: true,
       })
       await expect(tx).to.be.reverted
-    })
-
-    it("sets the deployer address as chairperson", async function () {
-      const chairperson = await ballot.chairperson()
-      const deployer = await ethers.getNamedSigner("deployer")
-      expect(chairperson).to.eq(deployer.address)
     })
 
     describe("when the voter interacts with the vote function in the contract", function () {
@@ -261,7 +256,7 @@ describe("Ballot", async () => {
       await tx.wait()
       await expect(tx)
         .to.emit(ballot, "UpkeepPerformed")
-        .withArgs(1, 3, 6, ballotConfig.ipfsFolderCIDs[1])
+        .withArgs(winningProposal, 3, 5, 6, ballotConfig.ipfsFolderCIDs[1])
 
       const balanceAccountZero = await ballot.balanceOf(accounts[0].address)
       expect(balanceAccountZero).to.eq(6)
