@@ -2,6 +2,7 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 import {NFTContract} from "./NFTContract.sol";
 import {Ballot} from "./Ballot.sol";
@@ -10,7 +11,7 @@ import {GovernanceToken} from "./GovernanceToken.sol";
 error Governor__CurrentBallotNotFinished();
 error Governor__OnlyTokenHolder();
 
-contract Governor is NFTContract {
+contract Governor is NFTContract, Ownable {
   using Counters for Counters.Counter;
 
   Counters.Counter private currentBallotId;
@@ -31,6 +32,7 @@ contract Governor is NFTContract {
 
   function createNewBallot(string[] memory _ipfsFolderCIDs, uint256[] memory _collectionsSize)
     public
+    onlyOwner
   {
     bool hasBallot = address(ballot) != address(0);
 
