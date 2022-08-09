@@ -29,20 +29,5 @@ const deployGovernanceToken: DeployFunction = async function (hre: HardhatRuntim
     await verify(governanceToken.address, [])
   }
 
-  log(`Delegating to ${deployer}`)
-  await delegate(governanceToken.address, deployer)
-
-  log("Delegated!")
-}
-
-const delegate = async (governanceTokenAddress: string, delegatedAccount: string) => {
-  const governanceToken = await ethers.getContractAt("GovernanceToken", governanceTokenAddress)
-  const transactionResponse = await governanceToken.delegate(delegatedAccount)
-
-  await transactionResponse.wait(1)
-
-  console.log(`Checkpoints: ${await governanceToken.numCheckpoints(delegatedAccount)}`)
-}
-
 export default deployGovernanceToken
 deployGovernanceToken.tags = ["all", "token"]

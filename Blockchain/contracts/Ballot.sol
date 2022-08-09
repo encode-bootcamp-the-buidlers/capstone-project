@@ -22,7 +22,6 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   // It will represent a single voter.
   struct Voter {
     bool voted; // if true, that person already voted
-    address delegate; // person delegated to
     uint256 vote; // index of the voted proposal
   }
 
