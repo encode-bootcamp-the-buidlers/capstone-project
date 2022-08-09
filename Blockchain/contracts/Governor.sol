@@ -44,4 +44,12 @@ contract Governor is NFTContract {
 
     ballot = new Ballot(address(voteToken), _ipfsFolderCIDs, _collectionsSize);
   }
+
+  function getCurrentBallotId() public view returns (uint256) {
+    return currentBallotId.current();
+  }
+
+  function getCurrentBallotAddress() public view returns (address) {
+    return address(ballot);
+  }
 }
