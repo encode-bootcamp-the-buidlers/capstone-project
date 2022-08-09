@@ -37,6 +37,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   }
   address public chairperson;
 
+  uint256 private totalVotes = 0;
   mapping(address => Voter) public voters;
   // mapping to link the proposalIndex to its voters
   mapping(uint256 => address[]) public proposalVoters;
@@ -45,6 +46,8 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   Proposal[] public proposals;
   IERC20Votes public voteToken;
   uint256 public referenceBlock;
+  uint256 private quorum;
+
   /**
    * Use an interval in seconds and a timestamp to slow execution of Upkeep
    */
@@ -54,6 +57,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   event UpkeepPerformed(
     uint256 winningProposal,
     uint256 winningProposalVoteCount,
+    uint256 totalVotes,
     uint256 winningProposalCollectionSize,
     string winningProposalIPFSFolderCID
   );
@@ -70,7 +74,8 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   constructor(
     address _voteToken,
     string[] memory _ipfsFolderCIDs,
-    uint256[] memory _collectionsSize
+    uint256[] memory _collectionsSize,
+    uint256 _quorum
   ) {
     if (_ipfsFolderCIDs.length != _collectionsSize.length)
       revert Ballot__Ipfs_CIDs_CollectionSize_Mismatch();
@@ -82,6 +87,8 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
 
     voteToken = IERC20Votes(_voteToken);
     referenceBlock = block.number;
+
+    quorum = _quorum;
 
     for (uint256 i = 0; i < _ipfsFolderCIDs.length; i++) {
       proposals.push(
@@ -167,6 +174,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     spentVotePower[msg.sender] += voters[msg.sender].weight;
     sender.voted = true;
     sender.vote = proposal;
+    totalVotes += sender.weight;
 
     // If `proposal` is out of the range of the array,
     // this will throw automatically and revert all
@@ -206,13 +214,15 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   // TODO
   // Chainlink Keepers will check the winningProposal after the votingPeriod has passed
   /// @dev this method is called by the keepers to check if `performUpkeep` should be performed
-  function checkUpkeep(bytes calldata)
-    external
+  function checkUpkeep(bytes memory)
+    public
     view
     override
     returns (bool upkeepNeeded, bytes memory)
   {
-    upkeepNeeded = (block.timestamp - lastTimeStamp) > interval;
+    bool timeReached = (block.timestamp - lastTimeStamp) > interval;
+    bool quorumReached = totalVotes >= quorum;
+    upkeepNeeded = timeReached && quorumReached;
   }
 
   function getVotersForProposal(uint256 index) public view returns (address[] memory) {
@@ -221,7 +231,8 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
 
   /// @dev this method is called by the keepers. It will mint the NFT collection (TODO)
   function performUpkeep(bytes calldata) external override onlyKeeperRegistry {
-    require((block.timestamp - lastTimeStamp) > interval, "The time to elapse hasn't been met.");
+    (bool upkeepNeeded, ) = checkUpkeep("");
+    require(upkeepNeeded, "The time to elapse and/or quorum hasn't been met.");
 
     lastTimeStamp = block.timestamp;
     Proposal storage winningProposal = proposals[getWinningProposal()];
@@ -244,6 +255,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     emit UpkeepPerformed(
       winningProposalIndex,
       winningProposal.voteCount,
+      totalVotes,
       collectionLength,
       winningProposal.ipfsFolderCID
     );
@@ -256,5 +268,13 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     require(_keeperRegistryAddress != address(0));
     keeperRegistryAddress = _keeperRegistryAddress;
     _grantRole(MINTER_ROLE, keeperRegistryAddress);
+  }
+
+  function getTotalVotes() public view returns (uint256) {
+    return totalVotes;
+  }
+
+  function getQuorum() public view returns (uint256) {
+    return quorum;
   }
 }

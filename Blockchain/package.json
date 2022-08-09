@@ -39,5 +39,7 @@
     "typechain": "^8.1.0",
     "typescript": ">=4.5.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "nodemon": "^2.0.19"
+  }
 }
