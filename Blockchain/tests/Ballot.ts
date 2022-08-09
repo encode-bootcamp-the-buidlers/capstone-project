@@ -27,7 +27,7 @@ beforeEach(async () => {
 })
 
 async function vote(ballot: Ballot, signer: Signer, proposal: number, amount?: number) {
-  const tx = await ballot.connect(signer).vote(proposal, amount || 10)
+  const tx = await ballot.connect(signer).vote(proposal, amount || 1)
   await tx.wait()
 }
 
@@ -139,7 +139,7 @@ describe("Ballot", async () => {
         const proposal = await ballot.proposals(indexWithHighestVotes)
 
         expect(winnerIndex).to.eq(proposal.index)
-        expect(proposal.voteCount).to.eq(30)
+        expect(proposal.voteCount).to.eq(3)
       })
     })
   })
@@ -159,7 +159,7 @@ describe("Ballot", async () => {
     })
 
     it("triggers checkUpkeep when interval time is reached", async () => {
-      await increaseTime((await ballot.interval()).toNumber())
+      await increaseTime((await ballot.interval()).toNumber() + 1)
 
       const [upkeepNeeded] = await ballot.checkUpkeep([])
       expect(upkeepNeeded).to.equal(true)
@@ -185,7 +185,7 @@ describe("Ballot", async () => {
 
       await increaseTime()
 
-      const proposalVoteCount = 10
+      const proposalVoteCount = 1
       const proposalFolderCid = ballotConfig.ipfsFolderCIDs[proposalToVote]
       const collectionSize = ballotConfig.collectionsSize[proposalToVote].toString()
 
@@ -225,7 +225,7 @@ describe("Ballot", async () => {
     await tx.wait()
     await expect(tx)
       .to.emit(ballot, "UpkeepPerformed")
-      .withArgs(1, 30, 6, ballotConfig.ipfsFolderCIDs[1])
+      .withArgs(1, 3, 6, ballotConfig.ipfsFolderCIDs[1])
 
     const balanceAccountZero = await ballot.balanceOf(accounts[0].address)
     expect(balanceAccountZero).to.eq(6)
