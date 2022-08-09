@@ -125,11 +125,9 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
 
   /// @dev the voting power has 18 decimal units
   function votingPower() public view returns (uint256 votingPower_) {
-    uint256 rawVotingPower = governanceTokenContract.balanceOf(msg.sender);
-    votingPower_ = rawVotingPower / 10**18;
+    votingPower_ = governanceTokenContract.balanceOf(msg.sender);
   }
 
-  // TODO
   // Chainlink Keepers will check the winningProposal after the votingPeriod has passed
   /// @dev this method is called by the keepers to check if `performUpkeep` should be performed
   function checkUpkeep(bytes calldata)
@@ -145,7 +143,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     return proposalVoters[index];
   }
 
-  /// @dev this method is called by the keepers. It will mint the NFT collection (TODO)
+  /// @dev this method is called by the keepers. It will mint the NFT collection
   function performUpkeep(bytes calldata) external override {
     require((block.timestamp - lastTimeStamp) > interval, "The time to elapse hasn't been met.");
 

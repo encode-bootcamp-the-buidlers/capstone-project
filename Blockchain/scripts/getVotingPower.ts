@@ -18,7 +18,7 @@ async function main() {
 
   console.log("Getting the current voting power")
   const votingPower = await ballotContract.votingPower()
-  console.log(`Current voting Power is ${votingPower}`)
+  console.log(`Current voting Power is ${votingPower / 10 ** 18}`)
 }
 
 main().catch((error) => {

@@ -1,24 +1,29 @@
 import { expect } from "chai"
-import { Signer } from "ethers"
+import { Signer, utils } from "ethers"
 import { deployments, ethers, getNamedAccounts } from "hardhat"
 import { ballotConfig } from "../hardhat-helper-config"
 import { Ballot } from "../typechain-types/contracts/Ballot.sol"
 import { GovernanceToken } from "../typechain-types/contracts/GovernanceToken"
 import { increaseTime } from "../utils/test"
 
-let ballot: Ballot
-let tokenContract: any
+let ballot: any // Ballot
+let tokenContract: any // GovernanceToken
 let accounts: any[]
 
 beforeEach(async () => {
   await deployments.fixture(["all"])
   accounts = await ethers.getSigners()
 
-  ballot = await ethers.getContract("Ballot")
+  const ballotContractFactory = await ethers.getContractFactory("Ballot")
   const tokenContractFactory = await ethers.getContractFactory("GovernanceToken")
-  tokenContract = await tokenContractFactory.deploy("DAO got talent", "DAOGT")
+  tokenContract = await tokenContractFactory.deploy("DAOs got talent", "DAOGT")
+  ballot = await ballotContractFactory.deploy(
+    tokenContract.address,
+    ballotConfig.ipfsFolderCIDs,
+    ballotConfig.collectionsSize
+  )
   await tokenContract.deployed()
-  await tokenContract.connect(accounts[0]).mint(accounts[0].address, 1000)
+  await ballot.deployed()
 })
 
 async function vote(ballot: Ballot, signer: Signer, proposal: number, amount?: number) {
@@ -117,10 +122,10 @@ describe("Ballot", async () => {
 
     describe("when someone interacts with the winnerIndex function after 5 random votes are cast for the proposals", function () {
       it("should return the index of the proposal with highest votes count", async function () {
-        await tokenContract.connect(accounts[1]).mint(accounts[1].address, 100)
-        await tokenContract.connect(accounts[2]).mint(accounts[2].address, 100)
-        await tokenContract.connect(accounts[3]).mint(accounts[3].address, 100)
-        await tokenContract.connect(accounts[4]).mint(accounts[4].address, 100)
+        await tokenContract.connect(accounts[1]).mint(accounts[1].address, utils.parseEther("10"))
+        await tokenContract.connect(accounts[2]).mint(accounts[2].address, utils.parseEther("10"))
+        await tokenContract.connect(accounts[3]).mint(accounts[3].address, utils.parseEther("10"))
+        await tokenContract.connect(accounts[4]).mint(accounts[4].address, utils.parseEther("10"))
 
         // Proposal 2 should be the proposal with highest votes count
         await vote(ballot, accounts[0], 0)
@@ -134,7 +139,7 @@ describe("Ballot", async () => {
         const proposal = await ballot.proposals(indexWithHighestVotes)
 
         expect(winnerIndex).to.eq(proposal.index)
-        expect(proposal.voteCount).to.eq(3)
+        expect(proposal.voteCount).to.eq(30)
       })
     })
   })
@@ -180,7 +185,7 @@ describe("Ballot", async () => {
 
       await increaseTime()
 
-      const proposalVoteCount = 1
+      const proposalVoteCount = 10
       const proposalFolderCid = ballotConfig.ipfsFolderCIDs[proposalToVote]
       const collectionSize = ballotConfig.collectionsSize[proposalToVote].toString()
 
@@ -203,10 +208,10 @@ describe("Ballot", async () => {
   })
 
   it("should mint the tokens to addresses that voted for the winning proposal", async () => {
-    await tokenContract.connect(accounts[1]).mint(accounts[1].address, 100)
-    await tokenContract.connect(accounts[2]).mint(accounts[2].address, 100)
-    await tokenContract.connect(accounts[3]).mint(accounts[3].address, 100)
-    await tokenContract.connect(accounts[4]).mint(accounts[4].address, 100)
+    await tokenContract.connect(accounts[1]).mint(accounts[1].address, utils.parseEther("10"))
+    await tokenContract.connect(accounts[2]).mint(accounts[2].address, utils.parseEther("10"))
+    await tokenContract.connect(accounts[3]).mint(accounts[3].address, utils.parseEther("10"))
+    await tokenContract.connect(accounts[4]).mint(accounts[4].address, utils.parseEther("10"))
 
     await vote(ballot, accounts[0], 1)
     await vote(ballot, accounts[1], 1)
@@ -220,7 +225,7 @@ describe("Ballot", async () => {
     await tx.wait()
     await expect(tx)
       .to.emit(ballot, "UpkeepPerformed")
-      .withArgs(1, 3, 6, ballotConfig.ipfsFolderCIDs[1])
+      .withArgs(1, 30, 6, ballotConfig.ipfsFolderCIDs[1])
 
     const balanceAccountZero = await ballot.balanceOf(accounts[0].address)
     expect(balanceAccountZero).to.eq(6)

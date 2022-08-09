@@ -2,7 +2,6 @@ import { HardhatRuntimeEnvironment } from "hardhat/types"
 import { DeployFunction } from "hardhat-deploy/types"
 import verify from "../scripts/utils/verify"
 import { networkConfig, developmentChains } from "../hardhat-helper-config"
-import { ethers } from "hardhat"
 
 const deployGovernanceToken: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // @ts-ignore
@@ -13,7 +12,7 @@ const deployGovernanceToken: DeployFunction = async function (hre: HardhatRuntim
   log("----------------------------------------------------")
   log("Deploying GovernanceToken and waiting for confirmations...")
 
-  const governanceTokenName = "DAO got talent"
+  const governanceTokenName = "DAOs got talent"
   const governanceTokenSymbol = "DAOGT"
 
   const governanceToken = await deploy("GovernanceToken", {
@@ -28,6 +27,7 @@ const deployGovernanceToken: DeployFunction = async function (hre: HardhatRuntim
   if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
     await verify(governanceToken.address, [])
   }
+}
 
 export default deployGovernanceToken
 deployGovernanceToken.tags = ["all", "token"]
