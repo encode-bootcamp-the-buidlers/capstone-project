@@ -59,9 +59,6 @@ function App() {
       const totalSupply = await daoContract.totalSupply()
       console.log("totalSupply", totalSupply)
 
-      const chairperson = await daoContract.chairperson()
-      console.log("chairperson", chairperson)
-
       //get on-chain proposal data
       const proposals = await daoContract.getAllProposals()
       setProposals(proposals)

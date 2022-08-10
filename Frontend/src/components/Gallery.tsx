@@ -8,24 +8,32 @@ import {
   Text,
 } from "@chakra-ui/react";
 import React from "react";
-import checkmark from "../assets/checkmark.svg";
+import { ethers } from "ethers"
+import checkmark from "../assets/checkmark.svg"
 
 type GalleryProps = {
   images: string[];
   artistName: string;
   percent?: number;
-  voteAddress?: string;
-};
+  daoContract?: ethers.Contract;
+  proposalIndex?: number;
+}
 
 export const Gallery: React.FC<GalleryProps> = ({
   images,
   artistName,
   percent,
-  voteAddress,
+  daoContract,
+  proposalIndex,
 }) => {
-  const vote = (voteAddress: string) => {
-    console.log(voteAddress);
-  };
+  const vote = async () => {
+    console.log("DAO Contract", daoContract)
+    if (daoContract) {
+      // TODO: user has to select the amount of tokens they're going to vote with
+      // for now, hardcoded 10
+      await daoContract.vote(proposalIndex, 10)
+    }
+  }
 
   return (
     <Flex flexDir="column">
@@ -44,10 +52,10 @@ export const Gallery: React.FC<GalleryProps> = ({
           </Flex>
         )}
 
-        {voteAddress && (
+        {!percent && (
           <Flex gap={3}>
             <Button
-              onClick={() => vote(voteAddress)}
+              onClick={() => vote()}
               borderRadius="full"
               borderColor="#20BE72"
               color="#20BE72"
