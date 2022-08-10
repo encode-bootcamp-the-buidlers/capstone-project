@@ -113,7 +113,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     proposals[proposal].voteCount += amount;
     sender.voted = true;
     sender.vote = proposal;
-    totalVotes += votingPowerUsed;
+    totalVotes += amount;
 
     // Burn the governance tokens once the participant has voted
     governanceTokenContract.burn(msg.sender, votingPowerUsed);

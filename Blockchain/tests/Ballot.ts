@@ -36,6 +36,15 @@ async function winningProposal(ballot: Ballot) {
   return await ballot.getWinningProposal()
 }
 
+async function reachMinimumQuorum() {
+  await tokenContract.connect(accounts[1]).mint(accounts[1].address, utils.parseEther("10"))
+  await tokenContract.connect(accounts[2]).mint(accounts[2].address, utils.parseEther("10"))
+
+  await vote(ballot, accounts[0], 2)
+  await vote(ballot, accounts[1], 2)
+  await vote(ballot, accounts[2], 2)
+}
+
 describe("Ballot", async () => {
   describe("basic functionality", () => {
     it("has the provided proposals setup correctly", async function () {
@@ -169,8 +178,10 @@ describe("Ballot", async () => {
         expect(upkeepNeeded).to.equal(false)
       })
 
-      it("triggers checkUpkeep when interval time is reached", async () => {
-        await increaseTime((await ballot.interval()).toNumber() + 1)
+      it("triggers checkUpkeep when interval time is reached and quorum is met", async () => {
+        await reachMinimumQuorum()
+
+        await increaseTime((await ballot.interval()).toNumber())
 
         const [upkeepNeeded] = await ballot.checkUpkeep([])
         expect(upkeepNeeded).to.equal(true)
@@ -195,16 +206,17 @@ describe("Ballot", async () => {
         expect(balance).to.equal("0")
         await expect(ballot.ownerOf(0)).to.be.revertedWith("ERC721: invalid token ID")
 
-        // All these indexes start from 0
-        const proposalToVote = 2
-
+        // All these indexes start from 0 and the first proposal with most votes is the winning proposal
+        // so, if vote counts is 0 for all proposals, still the first proposal is the winning one
         const winnerIndex = await winningProposal(ballot)
-        expect(winnerIndex.toString()).to.equal(proposalToVote.toString())
+        expect(winnerIndex.toString()).to.equal("0")
 
+        await reachMinimumQuorum()
         await increaseTime()
 
+        const proposalToVote = 2
         const proposalVoteCount = 3
-        const totalVotes = 5
+        const totalVotes = 3
         const proposalFolderCid = ballotConfig.ipfsFolderCIDs[proposalToVote]
         const collectionSize = ballotConfig.collectionsSize[proposalToVote].toString()
 
@@ -225,7 +237,7 @@ describe("Ballot", async () => {
         const totalSupply = (await ballot.totalSupply()).toString()
         expect(totalSupply).to.equal(`${3 * +collectionSize}`)
 
-        expect(await ballot.ownerOf(0)).to.be.equal(accounts[2].address)
+        expect(await ballot.ownerOf(0)).to.be.equal(accounts[0].address)
 
         const tokenURI = (await ballot.tokenURI(0)).toString()
         expect(tokenURI).to.equal(`ipfs://${proposalFolderCid}0.json`)
@@ -250,7 +262,7 @@ describe("Ballot", async () => {
 
       await ballot.setKeeperRegistryAddress(accounts[0].address)
 
-      const winningProposal = 2
+      const winningProposal = 1
 
       const tx = await ballot.performUpkeep([])
       await tx.wait()
