@@ -13,14 +13,16 @@ const deployBallot: DeployFunction = async function (hre: HardhatRuntimeEnvironm
   log("----------------------------------------------------")
   log("Deploying Ballot and waiting for confirmations...")
 
+  const args = [
+    governanceToken.address,
+    ballotConfig.ipfsFolderCIDs,
+    ballotConfig.collectionsSize,
+    ballotConfig.quorum,
+  ]
+
   const Ballot = await deploy("Ballot", {
     from: deployer,
-    args: [
-      governanceToken.address,
-      ballotConfig.ipfsFolderCIDs,
-      ballotConfig.collectionsSize,
-      ballotConfig.quorum,
-    ],
+    args,
     log: true,
     // we need to wait if on a live network so we can verify properly
     waitConfirmations: networkConfig[network.name].blockConfirmations || 1,
@@ -29,7 +31,7 @@ const deployBallot: DeployFunction = async function (hre: HardhatRuntimeEnvironm
   log(`Ballot at ${Ballot.address}`)
 
   if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
-    await verify(Ballot.address, [])
+    await verify(Ballot.address, args)
   }
 }
 
