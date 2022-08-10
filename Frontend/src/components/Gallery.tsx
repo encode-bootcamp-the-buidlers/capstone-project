@@ -10,6 +10,7 @@ import {
 import React from "react";
 import { ethers } from "ethers"
 import checkmark from "../assets/checkmark.svg"
+import AmountModal from "./AmountModal";
 
 type GalleryProps = {
   images: string[];
@@ -65,6 +66,7 @@ export const Gallery: React.FC<GalleryProps> = ({
             >
               Vote
             </Button>
+            <AmountModal/>
           </Flex>
         )}
       </Flex>
