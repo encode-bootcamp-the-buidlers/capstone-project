@@ -1,34 +1,40 @@
 import { expect } from "chai"
-import { Signer } from "ethers"
+import { Signer, utils } from "ethers"
 import { deployments, ethers, getNamedAccounts } from "hardhat"
 import { ballotConfig } from "../hardhat-helper-config"
 import { Ballot } from "../typechain-types/contracts/Ballot.sol"
 import { increaseTime } from "../utils/test"
+import { BigNumber } from "ethers"
 
-let ballot: Ballot
+let ballot: any // for some reason, declaring type Ballot breaks things
+let tokenContract: any // same here
 let accounts: any[]
 
 beforeEach(async () => {
   await deployments.fixture(["all"])
   accounts = await ethers.getSigners()
 
-  ballot = await ethers.getContract("Ballot")
+  const ballotContractFactory = await ethers.getContractFactory("Ballot")
+  const tokenContractFactory = await ethers.getContractFactory("GovernanceToken")
+  tokenContract = await tokenContractFactory.deploy("DAOs got talent", "DAOGT")
+  ballot = await ballotContractFactory.deploy(
+    tokenContract.address,
+    ballotConfig.ipfsFolderCIDs,
+    ballotConfig.collectionsSize,
+    ballotConfig.quorum
+  )
+  await tokenContract.deployed()
+  await ballot.deployed()
+
+  // Roles and minting setup
+  // set Ballot as the admin of the governance token contract
+  tokenContract.setRoles(accounts[0].address, ballot.address)
+  // mint governance tokens for the chaiperson
+  tokenContract.mint(accounts[0].address, BigNumber.from(1000).mul(BigNumber.from(10).pow(18)))
 })
 
-async function giveRightToVote(ballot: Ballot, voterAddress: any, signer?: Signer) {
-  const tx = signer
-    ? await ballot.connect(signer).giveRightToVote(voterAddress)
-    : await ballot.giveRightToVote(voterAddress)
-  await tx.wait()
-}
-
-async function vote(ballot: Ballot, signer: Signer, proposal: number) {
-  const tx = await ballot.connect(signer).vote(proposal)
-  await tx.wait()
-}
-
-async function delegate(ballot: Ballot, signer: Signer, to: string) {
-  const tx = await ballot.connect(signer).delegate(to)
+async function vote(ballot: Ballot, signer: Signer, proposal: number, amount?: number) {
+  const tx = await ballot.connect(signer).vote(proposal, amount || 1)
   await tx.wait()
 }
 
@@ -36,19 +42,13 @@ async function winningProposal(ballot: Ballot) {
   return await ballot.getWinningProposal()
 }
 
-// TODO: This makes the DAO centralized. We should just check for balance of the Token contract.
-async function giveRightToVoteAndVote() {
-  await giveRightToVote(ballot, accounts[1].address)
-  await giveRightToVote(ballot, accounts[2].address)
-  await giveRightToVote(ballot, accounts[3].address)
-  await giveRightToVote(ballot, accounts[4].address)
+async function reachMinimumQuorum() {
+  await tokenContract.mint(accounts[1].address, utils.parseEther("10"))
+  await tokenContract.mint(accounts[2].address, utils.parseEther("10"))
 
-  // Proposal 2 should be the proposal with highest votes count
-  await vote(ballot, accounts[0], 0)
-  await vote(ballot, accounts[1], 1)
+  await vote(ballot, accounts[0], 2)
+  await vote(ballot, accounts[1], 2)
   await vote(ballot, accounts[2], 2)
-  await vote(ballot, accounts[3], 2)
-  await vote(ballot, accounts[4], 2)
 }
 
 describe("Ballot", async () => {
@@ -95,259 +95,197 @@ describe("Ballot", async () => {
       await expect(tx).to.be.reverted
     })
 
-    it("sets the deployer address as chairperson", async function () {
-      const chairperson = await ballot.chairperson()
-      const deployer = await ethers.getNamedSigner("deployer")
-      expect(chairperson).to.eq(deployer.address)
-    })
+    describe("when the voter interacts with the vote function in the contract", function () {
+      it("shouldn't vote due to lack of tokens", async function () {
+        await expect(vote(ballot, accounts[1], 0)).to.be.revertedWith("Has not enough voting power")
+      })
 
-    it("sets the voting weight for the chairperson as 1", async function () {
-      const chairpersonVoter = await ballot.voters(accounts[0].address)
-      expect(chairpersonVoter.weight.toNumber()).to.eq(1)
-    })
-
-    it("sets the quorum on deployment", async () => {
-      const quorum = await ballot.getQuorum()
-      expect(quorum.toNumber()).to.eq(ballotConfig.quorum)
-    })
-  })
-
-  describe("when the chairperson interacts with the giveRightToVote function in the contract", function () {
-    it("gives right to vote for another address", async function () {
-      const voterAddress = accounts[1].address
-      const tx = await ballot.giveRightToVote(voterAddress)
-      await tx.wait()
-      const voter = await ballot.voters(voterAddress)
-      expect(voter.weight.toNumber()).to.eq(1)
-    })
-
-    it("can not give right to vote for someone that has voted", async function () {
-      const voterAddress = accounts[1].address
-      await giveRightToVote(ballot, voterAddress)
-      await ballot.connect(accounts[1]).vote(0)
-      await expect(giveRightToVote(ballot, voterAddress)).to.be.revertedWith(
-        "The voter already voted."
-      )
-    })
-
-    it("can not give right to vote for someone that already has voting rights", async function () {
-      const voterAddress = accounts[1].address
-      await giveRightToVote(ballot, voterAddress)
-      await expect(giveRightToVote(ballot, voterAddress)).to.be.reverted
-    })
-  })
-
-  describe("when the voter interacts with the vote function in the contract", function () {
-    it("should has the right to vote", async function () {
-      await expect(vote(ballot, accounts[1], 0)).to.be.revertedWith("Has no right to vote")
-    })
-
-    it("should not have voted already", async function () {
-      await vote(ballot, accounts[0], 0)
-      await expect(vote(ballot, accounts[0], 1)).to.be.revertedWith("Already voted.")
-    })
-
-    it("should increase the total votes according to the weight", async function () {
-      await giveRightToVote(ballot, accounts[1].address)
-      await giveRightToVote(ballot, accounts[2].address)
-
-      await vote(ballot, accounts[0], 0)
-      expect((await ballot.getTotalVotes()).toNumber()).to.eq(1)
-      await delegate(ballot, accounts[1], accounts[2].address)
-      await vote(ballot, accounts[2], 0)
-      expect((await ballot.getTotalVotes()).toNumber()).to.eq(3)
-    })
-
-    it("should increase the proposal voters for the voted proposal", async () => {
-      const proposalVotersBefore = await ballot.getVotersForProposal(0)
-      expect(proposalVotersBefore.length).to.eq(0)
-
-      await vote(ballot, accounts[0], 0)
-
-      const proposalVotersAfter = await ballot.getVotersForProposal(0)
-      expect(proposalVotersAfter.length).to.eq(1)
-    })
-
-    describe("when the voter interacts with the delegate function in the contract", function () {
-      it("should has not already voted", async function () {
+      it("should not have voted already", async function () {
         await vote(ballot, accounts[0], 0)
-        await expect(delegate(ballot, accounts[0], accounts[1].address)).to.be.revertedWith(
-          "You already voted."
-        )
+        await expect(vote(ballot, accounts[0], 1)).to.be.revertedWith("Already voted.")
       })
 
-      it("can not self-delegate", async function () {
-        await expect(delegate(ballot, accounts[0], accounts[0].address)).to.be.revertedWith(
-          "Self-delegation is disallowed."
-        )
-      })
-    })
+      it("should increase the proposal voters for the voted proposal", async () => {
+        const proposalVotersBefore = await ballot.getVotersForProposal(0)
+        expect(proposalVotersBefore.length).to.eq(0)
 
-    describe("when an attacker interacts with the giveRightToVote function in the contract", function () {
-      it("can not give voting rights", async function () {
-        await expect(giveRightToVote(ballot, accounts[2].address, accounts[1])).to.be.revertedWith(
-          "Only chairperson can give right to vote."
-        )
-      })
-    })
+        await vote(ballot, accounts[0], 0)
 
-    describe("when an attacker interacts with the vote function in the contract", function () {
-      describe("and the proposal does not exist", function () {
-        it("should revert all the state changes", async function () {
-          await expect(vote(ballot, accounts[0], 1337)).to.be.reverted
+        const proposalVotersAfter = await ballot.getVotersForProposal(0)
+        expect(proposalVotersAfter.length).to.eq(1)
+      })
+
+      describe("when an attacker interacts with the vote function in the contract", function () {
+        describe("and the proposal does not exist", function () {
+          it("should revert all the state changes", async function () {
+            await expect(vote(ballot, accounts[0], 1337)).to.be.reverted
+          })
+        })
+      })
+
+      describe("when someone interacts with the winnerIndex function before any votes are cast", function () {
+        it("should return the index of the first proposal", async function () {
+          const winnerIndex = await ballot.winnerIndex()
+          expect(winnerIndex).to.eq(0)
+        })
+      })
+
+      describe("when someone interacts with the winnerIndex function after one vote is cast for the first proposal", function () {
+        it("should set the index of the first proposal as the winning proposal", async function () {
+          const proposals = await ballot.proposals
+          await vote(ballot, accounts[0], 0)
+          const winnerIndex = await ballot.winnerIndex()
+          expect(winnerIndex).to.eq(0)
+        })
+      })
+
+      describe("when someone interacts with the winnerIndex function after 5 random votes are cast for the proposals", function () {
+        it("should return the index of the proposal with highest votes count", async function () {
+          await tokenContract.mint(accounts[1].address, utils.parseEther("10"))
+          await tokenContract.mint(accounts[2].address, utils.parseEther("10"))
+          await tokenContract.mint(accounts[3].address, utils.parseEther("10"))
+          await tokenContract.mint(accounts[4].address, utils.parseEther("10"))
+
+          // Proposal 2 should be the proposal with highest votes count
+          await vote(ballot, accounts[0], 0)
+          await vote(ballot, accounts[1], 1)
+          await vote(ballot, accounts[2], 2)
+          await vote(ballot, accounts[3], 2)
+          await vote(ballot, accounts[4], 2)
+
+          const winnerIndex = await ballot.winnerIndex()
+          const indexWithHighestVotes = 2
+          const proposal = await ballot.proposals(indexWithHighestVotes)
+
+          expect(winnerIndex).to.eq(proposal.index)
+          expect(proposal.voteCount).to.eq(3)
         })
       })
     })
 
-    describe("when an attacker interacts with the delegate function in the contract", function () {
-      it("can not produce loop in delegation", async function () {
-        await giveRightToVote(ballot, accounts[1].address)
-        await delegate(ballot, accounts[0], accounts[1].address)
-        await expect(delegate(ballot, accounts[1], accounts[0].address)).to.be.revertedWith(
-          "Found loop in delegation."
+    describe("keepers", () => {
+      it("doesn't trigger checkUpkeep when interval time not reached yet", async () => {
+        const [upkeepNeeded] = await ballot.checkUpkeep([])
+        expect(upkeepNeeded).to.equal(false)
+      })
+
+      it("doesn't trigger checkUpkeep when interval time not reached yet 2", async () => {
+        const seconds = (await ballot.interval()).toNumber() - 5 // 5 seconds before interval
+        await increaseTime(seconds)
+
+        const [upkeepNeeded] = await ballot.checkUpkeep([])
+        expect(upkeepNeeded).to.equal(false)
+      })
+
+      it("doesn't trigger checkUpkeep when quorum not reached yet", async () => {
+        await increaseTime((await ballot.interval()).toNumber())
+
+        const [upkeepNeeded] = await ballot.checkUpkeep([])
+        expect(upkeepNeeded).to.equal(false)
+      })
+
+      it("triggers checkUpkeep when interval time is reached and quorum is met", async () => {
+        await reachMinimumQuorum()
+
+        await increaseTime((await ballot.interval()).toNumber())
+
+        const [upkeepNeeded] = await ballot.checkUpkeep([])
+        expect(upkeepNeeded).to.equal(true)
+      })
+
+      it("should not be able to call performUpkeep if not in keeper registry", async () => {
+        await expect(ballot.performUpkeep([])).to.be.revertedWithCustomError(
+          ballot,
+          "OnlyKeeperRegistry"
         )
       })
-    })
 
-    describe("when someone interacts with the winnerIndex function before any votes are cast", function () {
-      it("should return the index of the first proposal", async function () {
-        const winnerIndex = await ballot.winnerIndex()
-        expect(winnerIndex).to.eq(0)
+      it("should not be able to call performUpkeep and mint if time constraint is not met", async () => {
+        await ballot.setKeeperRegistryAddress(accounts[0].address)
+        await expect(ballot.performUpkeep([])).to.be.revertedWith(
+          "The time to elapse and/or quorum hasn't been met."
+        )
+      })
+
+      it("can performUpkeep and mint", async () => {
+        let balance = (await ballot.balanceOf(accounts[0].address)).toString()
+        expect(balance).to.equal("0")
+        await expect(ballot.ownerOf(0)).to.be.revertedWith("ERC721: invalid token ID")
+
+        // All these indexes start from 0 and the first proposal with most votes is the winning proposal
+        // so, if vote counts is 0 for all proposals, still the first proposal is the winning one
+        const winnerIndex = await winningProposal(ballot)
+        expect(winnerIndex.toString()).to.equal("0")
+
+        await reachMinimumQuorum()
+        await increaseTime()
+
+        const proposalToVote = 2
+        const proposalVoteCount = 3
+        const totalVotes = 3
+        const proposalFolderCid = ballotConfig.ipfsFolderCIDs[proposalToVote]
+        const collectionSize = ballotConfig.collectionsSize[proposalToVote].toString()
+
+        await ballot.setKeeperRegistryAddress(accounts[0].address)
+
+        const tx = await ballot.performUpkeep([])
+        await tx.wait()
+        await expect(tx)
+          .to.emit(ballot, "UpkeepPerformed")
+          .withArgs(
+            proposalToVote,
+            proposalVoteCount,
+            totalVotes,
+            collectionSize,
+            proposalFolderCid
+          )
+
+        const totalSupply = (await ballot.totalSupply()).toString()
+        expect(totalSupply).to.equal(`${3 * +collectionSize}`)
+
+        expect(await ballot.ownerOf(0)).to.be.equal(accounts[0].address)
+
+        const tokenURI = (await ballot.tokenURI(0)).toString()
+        expect(tokenURI).to.equal(`ipfs://${proposalFolderCid}0.json`)
+
+        expect((await ballot.getTotalVotes()).toString()).to.equal(`${totalVotes}`)
       })
     })
 
-    describe("when someone interacts with the winnerIndex function after one vote is cast for the first proposal", function () {
-      it("should set the index of the first proposal as the winning proposal", async function () {
-        const proposals = await ballot.proposals
-        await vote(ballot, accounts[0], 0)
-        const winnerIndex = await ballot.winnerIndex()
-        expect(winnerIndex).to.eq(0)
-      })
-    })
+    it("should mint the tokens to addresses that voted for the winning proposal", async () => {
+      await tokenContract.mint(accounts[1].address, utils.parseEther("10"))
+      await tokenContract.mint(accounts[2].address, utils.parseEther("10"))
+      await tokenContract.mint(accounts[3].address, utils.parseEther("10"))
+      await tokenContract.mint(accounts[4].address, utils.parseEther("10"))
 
-    describe("when someone interacts with the winnerIndex function after 5 random votes are cast for the proposals", function () {
-      it("should return the index of the proposal with highest votes count", async function () {
-        await giveRightToVoteAndVote()
-
-        const winnerIndex = await ballot.winnerIndex()
-        const indexWithHighestVotes = 2
-        const proposal = await ballot.proposals(indexWithHighestVotes)
-
-        expect(winnerIndex).to.eq(proposal.index)
-        expect(proposal.voteCount).to.eq(3)
-      })
-    })
-  })
-
-  describe("keepers", () => {
-    it("doesn't trigger checkUpkeep when interval time not reached yet", async () => {
-      await giveRightToVoteAndVote()
-      const [upkeepNeeded] = await ballot.checkUpkeep([])
-      expect(upkeepNeeded).to.equal(false)
-    })
-
-    it("doesn't trigger checkUpkeep when interval time not reached yet 2", async () => {
-      const seconds = (await ballot.interval()).toNumber() - 5 // 5 seconds before interval
-      await increaseTime(seconds)
-
-      const [upkeepNeeded] = await ballot.checkUpkeep([])
-      expect(upkeepNeeded).to.equal(false)
-    })
-
-    it("doesn't trigger checkUpkeep when quorum not reached yet", async () => {
-      await increaseTime((await ballot.interval()).toNumber())
-
-      const [upkeepNeeded] = await ballot.checkUpkeep([])
-      expect(upkeepNeeded).to.equal(false)
-    })
-
-    it("triggers checkUpkeep when interval time is reached", async () => {
-      await giveRightToVoteAndVote()
-
-      await increaseTime((await ballot.interval()).toNumber())
-
-      const [upkeepNeeded] = await ballot.checkUpkeep([])
-      expect(upkeepNeeded).to.equal(true)
-    })
-
-    it("should not be able to call performUpkeep if not in keeper registry", async () => {
-      await expect(ballot.performUpkeep([])).to.be.revertedWithCustomError(
-        ballot,
-        "OnlyKeeperRegistry"
-      )
-    })
-
-    it("should not be able to call performUpkeep and mint if time constraint is not met", async () => {
-      await ballot.setKeeperRegistryAddress(accounts[0].address)
-      await expect(ballot.performUpkeep([])).to.be.revertedWith(
-        "The time to elapse and/or quorum hasn't been met."
-      )
-    })
-
-    it("can performUpkeep and mint", async () => {
-      let balance = (await ballot.balanceOf(accounts[0].address)).toString()
-      expect(balance).to.equal("0")
-      await expect(ballot.ownerOf(0)).to.be.revertedWith("ERC721: invalid token ID")
-
-      // All these indexes start from 0
-      const proposalToVote = 2
-
-      await giveRightToVoteAndVote()
-
-      const winnerIndex = await winningProposal(ballot)
-      expect(winnerIndex.toString()).to.equal(proposalToVote.toString())
+      await vote(ballot, accounts[0], 1)
+      await vote(ballot, accounts[1], 1)
+      await vote(ballot, accounts[2], 1)
+      await vote(ballot, accounts[3], 2)
+      await vote(ballot, accounts[4], 2)
 
       await increaseTime()
 
-      const proposalVoteCount = 3
-      const totalVotes = 5
-      const proposalFolderCid = ballotConfig.ipfsFolderCIDs[proposalToVote]
-      const collectionSize = ballotConfig.collectionsSize[proposalToVote].toString()
-
       await ballot.setKeeperRegistryAddress(accounts[0].address)
+
+      const winningProposal = 1
 
       const tx = await ballot.performUpkeep([])
       await tx.wait()
       await expect(tx)
         .to.emit(ballot, "UpkeepPerformed")
-        .withArgs(proposalToVote, proposalVoteCount, totalVotes, collectionSize, proposalFolderCid)
+        .withArgs(winningProposal, 3, 5, 6, ballotConfig.ipfsFolderCIDs[1])
 
-      const totalSupply = (await ballot.totalSupply()).toString()
-      expect(totalSupply).to.equal(`${3 * +collectionSize}`)
-
-      expect(await ballot.ownerOf(0)).to.be.equal(accounts[2].address)
-
-      const tokenURI = (await ballot.tokenURI(0)).toString()
-      expect(tokenURI).to.equal(`ipfs://${proposalFolderCid}0.json`)
-
-      expect((await ballot.getTotalVotes()).toString()).to.equal(`${totalVotes}`)
+      const balanceAccountZero = await ballot.balanceOf(accounts[0].address)
+      expect(balanceAccountZero).to.eq(6)
+      const balanceAccountOne = await ballot.balanceOf(accounts[1].address)
+      expect(balanceAccountOne).to.eq(6)
+      const balanceAccountTwo = await ballot.balanceOf(accounts[2].address)
+      expect(balanceAccountTwo).to.eq(6)
+      const balanceAccountThree = await ballot.balanceOf(accounts[3].address)
+      expect(balanceAccountThree).to.eq(0)
+      const balanceAccountFour = await ballot.balanceOf(accounts[4].address)
+      expect(balanceAccountFour).to.eq(0)
     })
-  })
-
-  it("should mint the tokens to addresses that voted for the winning proposal", async () => {
-    await giveRightToVoteAndVote()
-
-    await increaseTime()
-
-    await ballot.setKeeperRegistryAddress(accounts[0].address)
-
-    const winningProposal = 2
-
-    const tx = await ballot.performUpkeep([])
-    await tx.wait()
-    await expect(tx)
-      .to.emit(ballot, "UpkeepPerformed")
-      .withArgs(winningProposal, 3, 5, 6, ballotConfig.ipfsFolderCIDs[winningProposal])
-
-    const balanceAccountZero = await ballot.balanceOf(accounts[0].address)
-    expect(balanceAccountZero).to.eq(0)
-    const balanceAccountOne = await ballot.balanceOf(accounts[1].address)
-    expect(balanceAccountOne).to.eq(0)
-    const balanceAccountTwo = await ballot.balanceOf(accounts[2].address)
-    expect(balanceAccountTwo).to.eq(6)
-    const balanceAccountThree = await ballot.balanceOf(accounts[3].address)
-    expect(balanceAccountThree).to.eq(6)
-    const balanceAccountFour = await ballot.balanceOf(accounts[4].address)
-    expect(balanceAccountFour).to.eq(6)
   })
 })
