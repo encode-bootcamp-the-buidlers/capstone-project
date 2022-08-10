@@ -20,7 +20,7 @@ function App() {
   //state variables
   const [walletAddress, setWalletAddress] = useState("");
   const [daoContract, setDaoContract] = useState(new ethers.Contract(ethers.constants.AddressZero, [])); //necessary init due to TS
-
+  const [proposals, setProposals] = useState<any[]>([])
   //functions
 
   //facilitates login process
@@ -61,10 +61,13 @@ function App() {
 
       const chairperson = await daoContract.chairperson()
       console.log("chairperson", chairperson)
-      
+
       //get on-chain proposal data
-      const proposals = await daoContract.proposals(0)
-      console.log("proposals", proposals)
+      const proposal0 = await daoContract.proposals(0)
+      const proposal1 = await daoContract.proposals(1)
+      setProposals([proposal0, proposal1])
+      console.log("first proposal", proposal0)
+
     }else{
       alert("DAO got talent is in development! Please connect to rinkeby test network to access website.")
     }
