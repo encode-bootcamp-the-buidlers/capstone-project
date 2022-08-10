@@ -76,7 +76,7 @@ export function Vote(props : Props) {
               //before: https://ipfs.io/ipfs/
               (item : any) => "https://ipfs.io/ipfs/" + item
             )}
-            artistName={gallery.index}
+            artistName={"collection nr. "+gallery.index}
             voteAddress="NA"
           />
         ))
