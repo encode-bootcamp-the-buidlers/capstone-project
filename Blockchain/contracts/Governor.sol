@@ -19,13 +19,6 @@ contract Governor is NFTContract, Ownable {
   Ballot private ballot;
   address[] public pastBallots;
 
-  modifier onlyTokenHolder() {
-    if (voteToken.balanceOf(msg.sender) == 0) {
-      revert Governor__OnlyTokenHolder();
-    }
-    _;
-  }
-
   constructor(address _voteToken) {
     voteToken = GovernanceToken(_voteToken);
   }
