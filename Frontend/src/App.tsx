@@ -63,13 +63,13 @@ function App() {
       console.log("chairperson", chairperson)
 
       //get on-chain proposal data
-      const proposal0 = await daoContract.proposals(0)
-      const proposal1 = await daoContract.proposals(1)
-      setProposals([proposal0, proposal1])
-      console.log("first proposal", proposal0)
-
-    }else{
-      alert("DAO got talent is in development! Please connect to rinkeby test network to access website.")
+      const proposals = await daoContract.getAllProposals()
+      setProposals(proposals)
+      console.log("First proposal", proposals[0])
+    } else {
+      alert(
+        "DAO got talent is in development! Please connect to rinkeby test network to access website."
+      )
     }
   }
 
@@ -104,9 +104,9 @@ function App() {
           </Flex>
 
           {walletAddress !== "" ? (
-            <Box>Logged in as {walletAddress}</Box>
+            <Box className="metamask">Logged in as {walletAddress}</Box>
           ) : (
-            <Box onClick={connectWallet}>Wallet login</Box>
+            <Box className="metamask" onClick={connectWallet}>Wallet login</Box>
           )}
         </Flex>
 

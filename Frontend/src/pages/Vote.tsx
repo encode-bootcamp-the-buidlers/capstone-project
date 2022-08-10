@@ -27,9 +27,8 @@ export function Vote(props : Props) {
       try {
 
         //get proposal data
-        const proposal0 = await props.daoContract.proposals(0)
-        const proposal1 = await props.daoContract.proposals(1)
-        setProposals([proposal0, proposal1])
+        const proposals = await props.daoContract.getAllProposals()
+        setProposals(proposals)
 
         // get collection from ipfs and store it in galleries array
         interface Gallery {
@@ -37,7 +36,7 @@ export function Vote(props : Props) {
           items? : string[]
         }
         const galleries = []
-        for(const proposal of [proposal0, proposal1]){
+        for(const proposal of proposals){
 
           // access ipfs folder of proposal
           const collection = await axios.get("https://dweb.link/api/v0/ls?arg="+proposal.ipfsFolderCID)
