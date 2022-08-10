@@ -54,6 +54,8 @@ contract GovernanceToken is ERC20, ERC20Burnable, AccessControl, ERC20Permit, ER
     super._burn(account, amount);
   }
 
+  /// @dev The deployer of the contract chooses the minter and burner accounts
+  /// In our deployment script, the deployer is the minter and the Ballot contract the burner
   function setRoles(address _minter, address _ballotAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(_ballotAddress != address(0));
     ballotAddress = _ballotAddress;
