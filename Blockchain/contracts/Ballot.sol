@@ -277,4 +277,8 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   function getQuorum() public view returns (uint256) {
     return quorum;
   }
+
+  function hasVotingFinished() public view returns (bool) {
+    return !proposals[getWinningProposal()].active;
+  }
 }

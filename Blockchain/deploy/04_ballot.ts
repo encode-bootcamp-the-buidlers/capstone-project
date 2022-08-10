@@ -3,6 +3,8 @@ import { HardhatRuntimeEnvironment } from "hardhat/types"
 import { ballotConfig, developmentChains, networkConfig } from "../hardhat-helper-config"
 import verify from "../scripts/utils/verify"
 
+// NORMALLY BALLOTS ARE DEPLOYED BY THE GOVERNOR!
+
 const deployBallot: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // @ts-ignore
   const { getNamedAccounts, deployments, network } = hre
@@ -34,4 +36,4 @@ const deployBallot: DeployFunction = async function (hre: HardhatRuntimeEnvironm
 }
 
 export default deployBallot
-deployBallot.tags = ["all", "ballot"]
+deployBallot.tags = ["ballot"]
