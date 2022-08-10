@@ -45,15 +45,27 @@ function App() {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     console.log("provider", provider)
 
-    const signer = provider.getSigner()
-    console.log("signer", signer)
+    const network = await provider.getNetwork()
+    console.log("network", network)
+    
+    if(network.name === "rinkeby"){
+      const signer = provider.getSigner()
+      console.log("signer", signer)
 
-    const daoContract = new ethers.Contract(DaoContract.address, DaoContract.abi, signer)
-    setDaoContract(daoContract)
-    console.log("Dao contract", daoContract)
+      const daoContract = new ethers.Contract(DaoContract.address, DaoContract.abi, signer)
+      setDaoContract(daoContract)
+      console.log("Dao contract", daoContract)
 
-    const totalSupply = await daoContract.totalSupply()
-    console.log("totalSupply", totalSupply) 
+      const totalSupply = await daoContract.totalSupply()
+      console.log("totalSupply", totalSupply)
+      
+      //get on-chain proposal data
+      const proposals = await daoContract.proposals()
+      console.log("proposals", proposals)
+    }else{
+      alert("DAO got talent is in development! Please connect to rinkeby test network to access website.")
+    }
+    
   }
 
   //triggers login and creates connection to dao contract
