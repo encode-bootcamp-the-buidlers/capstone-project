@@ -3,11 +3,10 @@ import { Signer, utils } from "ethers"
 import { deployments, ethers, getNamedAccounts } from "hardhat"
 import { ballotConfig } from "../hardhat-helper-config"
 import { Ballot } from "../typechain-types/contracts/Ballot.sol"
-import { GovernanceToken } from "../typechain-types/contracts/GovernanceToken"
 import { increaseTime } from "../utils/test"
 
-let ballot: any // Ballot
-let tokenContract: any // GovernanceToken
+let ballot: any // for some reason, declaring type Ballot breaks things
+let tokenContract: any // same here
 let accounts: any[]
 
 beforeEach(async () => {
