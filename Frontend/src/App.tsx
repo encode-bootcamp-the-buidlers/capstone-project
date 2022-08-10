@@ -47,7 +47,7 @@ function App() {
 
     const network = await provider.getNetwork()
     console.log("network", network)
-    
+
     if(network.name === "rinkeby"){
       const signer = provider.getSigner()
       console.log("signer", signer)
@@ -58,14 +58,16 @@ function App() {
 
       const totalSupply = await daoContract.totalSupply()
       console.log("totalSupply", totalSupply)
+
+      const chairperson = await daoContract.chairperson()
+      console.log("chairperson", chairperson)
       
       //get on-chain proposal data
-      const proposals = await daoContract.proposals()
+      const proposals = await daoContract.proposals(0)
       console.log("proposals", proposals)
     }else{
       alert("DAO got talent is in development! Please connect to rinkeby test network to access website.")
     }
-    
   }
 
   //triggers login and creates connection to dao contract
