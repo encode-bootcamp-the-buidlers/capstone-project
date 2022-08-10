@@ -139,7 +139,7 @@ function App() {
           <Flex w="full" h="full" justifyContent="center">
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/vote" element={<Vote />} />
+              <Route path="/vote" element={<Vote daoContract={daoContract}/>} />
               <Route path="/my-collections" element={<MyCollections />} />
             </Routes>
           </Flex>
