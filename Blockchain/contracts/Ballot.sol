@@ -42,6 +42,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
 
   Proposal[] public proposals;
   IERC20Votes public voteToken;
+  string[] public collectionTokenUris;
   uint256 public referenceBlock;
   uint256 private quorum;
 
@@ -181,6 +182,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
       string memory finalTokenUri = string(abi.encodePacked(prefix, suffix));
       for (uint256 j = 0; j < proposalVoters[winningProposalIndex].length; j++) {
         safeMint(proposalVoters[winningProposalIndex][j], finalTokenUri);
+        collectionTokenUris.push(finalTokenUri);
       }
     }
 
@@ -208,5 +210,20 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
 
   function getQuorum() public view returns (uint256) {
     return quorum;
+  }
+
+  function getAllProposals() public view returns (Proposal[] memory) {
+    return proposals;
+  }
+
+  /// @dev currently only one collection
+  function getAccountCollections() public view returns (string[] memory) {
+    Proposal storage winningProposal = proposals[getWinningProposal()];
+    require(!winningProposal.active, "Voting is still ongoing");
+    require(
+      voters[msg.sender].vote == winningProposal.index,
+      "Voter didn't vote for the winning proposal. Therefore, won nothing"
+    );
+    return collectionTokenUris;
   }
 }
