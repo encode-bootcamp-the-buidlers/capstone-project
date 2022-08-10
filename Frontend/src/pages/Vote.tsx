@@ -4,7 +4,6 @@ import { ContentWrapper } from "../components/PageWrapper";
 import { collections } from "../utils/collections";
 
 import { ethers } from "ethers";
-import{ create } from "ipfs-http-client";
 
 const axios = require('axios');
 
@@ -16,6 +15,7 @@ export function Vote(props : Props) {
 
   //state variables
   const [proposals, setProposals] = useState<any[]>([])
+  const [galleries, setGalleries] = useState<any[]>([])
 
   //effect on mount
   useEffect(() => {
@@ -29,23 +29,36 @@ export function Vote(props : Props) {
         //get proposal data
         const proposal0 = await props.daoContract.proposals(0)
         const proposal1 = await props.daoContract.proposals(1)
-        console.log("proposal0",proposal0)
         setProposals([proposal0, proposal1])
 
-        //get CID of items of each collection
-        const url = 'https://dweb.link/api/v0';
-        const ipfs = create({ url });
-
-        const links = [];
-        for await (const link of ipfs.ls(proposal0.ipfsFolderCID)) {
-          links.push(link);
+        // get collection from ipfs and store it in galleries array
+        interface Gallery {
+          index : number,
+          items? : string[]
         }
-        console.log(links);
+        const galleries = []
+        for(const proposal of [proposal0, proposal1]){
 
-          //const proposedCollection0 = await axios.get("https://ipfs.infura.io/ipfs/"+proposal0.ipfsFolderCID)
-          //console.log(proposedCollection0)
-        //get current amount of votes for each collection
-        //get issuer of each collection
+          // access ipfs folder of proposal
+          const collection = await axios.get("https://dweb.link/api/v0/ls?arg="+proposal.ipfsFolderCID)
+
+          // final gallery object containing all information
+          const gallery: Gallery = {
+            index : proposal["index"].toNumber()
+          };
+
+          // get CID of files in ipfs folder and store it in gaery object
+          const cids = []
+          for(const item of collection["data"]["Objects"][0]["Links"]){
+            if(item["Name"].includes("png")){
+              cids.push(item["Hash"])
+            }
+          }
+          gallery.items = cids
+          galleries.push(gallery)
+        }
+        setGalleries(galleries)
+        console.log("galleries", galleries)
       } catch (error) {
         console.log(error)
       }
@@ -53,8 +66,27 @@ export function Vote(props : Props) {
     getProposedCollections()
   }, []);
   return (
-    <ContentWrapper>
-      <Gallery
+    galleries ? 
+      <ContentWrapper>
+      {
+        galleries.map((gallery, idx) => (
+          <Gallery
+            key={idx}
+            images={gallery.items.map(
+              //before: https://ipfs.io/ipfs/
+              (item : any) => "https://ipfs.io/ipfs/" + item
+            )}
+            artistName={gallery.index}
+            voteAddress="NA"
+          />
+        ))
+      }
+      </ContentWrapper>
+    :
+    <div>No proposals</div>  
+  );
+  /*
+  <Gallery
         images={collections[0].items.map(
           (item) => "https://ipfs.infura.io/ipfs/" + item
         )}
@@ -68,6 +100,5 @@ export function Vote(props : Props) {
         artistName="K"
         voteAddress="69"
       />
-    </ContentWrapper>
-  );
+  */
 }
