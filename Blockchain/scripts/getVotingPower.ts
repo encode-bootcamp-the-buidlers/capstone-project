@@ -1,5 +1,5 @@
 import "dotenv/config"
-import { ethers } from "ethers"
+import { ethers, BigNumber } from "ethers"
 import * as ballotJson from "../artifacts/contracts/Ballot.sol/Ballot.json"
 import { getSignerProvider, getWallet } from "./utils/utils"
 
@@ -17,8 +17,9 @@ async function main() {
   const ballotContract = new ethers.Contract(contractAddress, ballotJson.abi, signer)
 
   console.log("Getting the current voting power")
-  const votingPower = await ballotContract.votingPower()
-  console.log(`Current voting Power is ${votingPower / 10 ** 18}`)
+  const votingPowerRaw = await ballotContract.votingPower()
+  const votingPower = BigNumber.from(votingPowerRaw).div(BigNumber.from(10).pow(18))
+  console.log(`Current voting Power is ${votingPower.toNumber()}`)
 }
 
 main().catch((error) => {

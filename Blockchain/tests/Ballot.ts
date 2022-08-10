@@ -4,6 +4,7 @@ import { deployments, ethers, getNamedAccounts } from "hardhat"
 import { ballotConfig } from "../hardhat-helper-config"
 import { Ballot } from "../typechain-types/contracts/Ballot.sol"
 import { increaseTime } from "../utils/test"
+import { BigNumber } from "ethers"
 
 let ballot: any // for some reason, declaring type Ballot breaks things
 let tokenContract: any // same here
@@ -24,6 +25,12 @@ beforeEach(async () => {
   )
   await tokenContract.deployed()
   await ballot.deployed()
+
+  // Roles and minting setup
+  // set Ballot as the admin of the governance token contract
+  tokenContract.setRoles(accounts[0].address, ballot.address)
+  // mint governance tokens for the chaiperson
+  tokenContract.mint(accounts[0].address, BigNumber.from(1000).mul(BigNumber.from(10).pow(18)))
 })
 
 async function vote(ballot: Ballot, signer: Signer, proposal: number, amount?: number) {
@@ -36,8 +43,8 @@ async function winningProposal(ballot: Ballot) {
 }
 
 async function reachMinimumQuorum() {
-  await tokenContract.connect(accounts[1]).mint(accounts[1].address, utils.parseEther("10"))
-  await tokenContract.connect(accounts[2]).mint(accounts[2].address, utils.parseEther("10"))
+  await tokenContract.mint(accounts[1].address, utils.parseEther("10"))
+  await tokenContract.mint(accounts[2].address, utils.parseEther("10"))
 
   await vote(ballot, accounts[0], 2)
   await vote(ballot, accounts[1], 2)
@@ -134,10 +141,10 @@ describe("Ballot", async () => {
 
       describe("when someone interacts with the winnerIndex function after 5 random votes are cast for the proposals", function () {
         it("should return the index of the proposal with highest votes count", async function () {
-          await tokenContract.connect(accounts[1]).mint(accounts[1].address, utils.parseEther("10"))
-          await tokenContract.connect(accounts[2]).mint(accounts[2].address, utils.parseEther("10"))
-          await tokenContract.connect(accounts[3]).mint(accounts[3].address, utils.parseEther("10"))
-          await tokenContract.connect(accounts[4]).mint(accounts[4].address, utils.parseEther("10"))
+          await tokenContract.mint(accounts[1].address, utils.parseEther("10"))
+          await tokenContract.mint(accounts[2].address, utils.parseEther("10"))
+          await tokenContract.mint(accounts[3].address, utils.parseEther("10"))
+          await tokenContract.mint(accounts[4].address, utils.parseEther("10"))
 
           // Proposal 2 should be the proposal with highest votes count
           await vote(ballot, accounts[0], 0)
@@ -246,10 +253,10 @@ describe("Ballot", async () => {
     })
 
     it("should mint the tokens to addresses that voted for the winning proposal", async () => {
-      await tokenContract.connect(accounts[1]).mint(accounts[1].address, utils.parseEther("10"))
-      await tokenContract.connect(accounts[2]).mint(accounts[2].address, utils.parseEther("10"))
-      await tokenContract.connect(accounts[3]).mint(accounts[3].address, utils.parseEther("10"))
-      await tokenContract.connect(accounts[4]).mint(accounts[4].address, utils.parseEther("10"))
+      await tokenContract.mint(accounts[1].address, utils.parseEther("10"))
+      await tokenContract.mint(accounts[2].address, utils.parseEther("10"))
+      await tokenContract.mint(accounts[3].address, utils.parseEther("10"))
+      await tokenContract.mint(accounts[4].address, utils.parseEther("10"))
 
       await vote(ballot, accounts[0], 1)
       await vote(ballot, accounts[1], 1)

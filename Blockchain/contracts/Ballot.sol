@@ -82,8 +82,6 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     interval = 1 minutes; // for testing purposes
     lastTimeStamp = block.timestamp;
     governanceTokenContract = GovernanceToken(_voteToken);
-    // mint governance tokens for the chaiperson
-    governanceTokenContract.mint(msg.sender, 1000 * ethereumBase);
     voteToken = IERC20Votes(_voteToken);
     referenceBlock = block.number;
 
