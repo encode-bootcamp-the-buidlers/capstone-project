@@ -23,10 +23,11 @@ contract Governor is NFTContract, Ownable {
     voteToken = GovernanceToken(_voteToken);
   }
 
-  function createNewBallot(string[] memory _ipfsFolderCIDs, uint256[] memory _collectionsSize)
-    public
-    onlyOwner
-  {
+  function createNewBallot(
+    string[] memory _ipfsFolderCIDs,
+    uint256[] memory _collectionsSize,
+    uint256 _quorum
+  ) public onlyOwner {
     bool hasBallot = address(ballot) != address(0);
 
     if (hasBallot && !ballot.hasVotingFinished()) {
@@ -39,7 +40,7 @@ contract Governor is NFTContract, Ownable {
 
     currentBallotId.increment(); // start at 1
 
-    ballot = new Ballot(address(voteToken), _ipfsFolderCIDs, _collectionsSize);
+    ballot = new Ballot(address(voteToken), _ipfsFolderCIDs, _collectionsSize, _quorum);
   }
 
   function getCurrentBallotId() public view returns (uint256) {

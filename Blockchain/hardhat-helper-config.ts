@@ -19,6 +19,10 @@ export const networkConfig: networkConfigInfo = {
 
 export const developmentChains = ["hardhat", "localhost"]
 
+export const governorConfig = {
+  createBallotOnDeploy: true,
+}
+
 export const ballotConfig = {
   ipfsFolderCIDs: [
     // IMPORTANT! leave the trailing slash to indicate it's a folder
