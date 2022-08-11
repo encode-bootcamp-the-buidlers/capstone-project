@@ -11,13 +11,15 @@ export function Home() {
           Welcome To DAOs got talent!
         </Heading>
       </Flex>
-      <Text fontSize="lg">
-        We are aiming at cutting the noise in the NFT space!! 🚀 🚀 🚀{" "}
-      </Text>
-      <Image
-        maxW="xl"
-        src="https://c.tenor.com/4bXSLBEsxlYAAAAC/welcome-terry-crews.gif"
-      />
+      <Flex alignItems="center" flexDir="column" gap={12}>
+        <Text fontSize="lg">
+          We are aiming at cutting the noise in the NFT space!! 🚀 🚀 🚀{" "}
+        </Text>
+        <Image
+          maxW="xl"
+          src="https://c.tenor.com/4bXSLBEsxlYAAAAC/welcome-terry-crews.gif"
+        />
+      </Flex>
       <Flex alignSelf="center">
         <Heading size="xl" color="#007eff">
           Idea
