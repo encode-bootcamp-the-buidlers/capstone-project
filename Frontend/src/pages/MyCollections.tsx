@@ -34,7 +34,7 @@ export function MyCollections(props:Props) {
     const balance = await nftContract.balanceOf(props.address)
     console.log("balance", balance.toNumber())
     if(balance.toNumber() === 0){
-      alert("You do not own any items of collections which have won!")
+      return
     }else{
       //get meta data of nfts owned by current user + voteCount for each collection the user partially owns and has won during voting
       const owned_nfts = []
@@ -61,7 +61,7 @@ export function MyCollections(props:Props) {
   }, []);
 
   return (
-    nfts ? 
+    nfts.length !== 0 ? 
       <ContentWrapper>
         <Gallery
           images={collections[0].items.map(
@@ -79,6 +79,6 @@ export function MyCollections(props:Props) {
         />
       </ContentWrapper>
       :
-    <div>You do not own NFTs which one the voting!</div>
+    <div>You do not own NFTs which won a voting!</div>
   );
 }
