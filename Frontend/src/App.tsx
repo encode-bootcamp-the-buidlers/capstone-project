@@ -148,7 +148,10 @@ function App() {
                 path="/vote"
                 element={<Vote daoContract={daoContract} />}
               />
-              <Route path="/my-collections" element={<MyCollections />} />
+              <Route
+                path="/my-collections"
+                element={<MyCollections daoContract={daoContract} />}
+              />
             </Routes>
           </Flex>
         </Flex>

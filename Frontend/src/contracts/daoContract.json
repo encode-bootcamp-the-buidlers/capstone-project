@@ -2,7 +2,7 @@
   "_format": "hh-sol-artifact-1",
   "contractName": "Ballot",
   "sourceName": "contracts/Ballot.sol",
-  "address" : "0x3ca7442fbA63135548f1cD96F48c072C7B4c998e",
+  "address": "0x3ca7442fbA63135548f1cD96F48c072C7B4c998e",
   "abi": [
     {
       "inputs": [
