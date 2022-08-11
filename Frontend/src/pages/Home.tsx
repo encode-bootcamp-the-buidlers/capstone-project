@@ -64,7 +64,7 @@ export function Home() {
         <Link href="https://github.com/Caruso33" isExternal>
           Caruso33 <ExternalLinkIcon mx="2px" />
         </Link>
-        <Link href="https://github.com/sidlami" isExternal>
+        <Link href="https://github.com/sid030sid" isExternal>
           Sid <ExternalLinkIcon mx="2px" />
         </Link>
         <Link href="https://github.com/lakchote" isExternal>
