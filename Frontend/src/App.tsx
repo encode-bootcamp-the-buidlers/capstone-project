@@ -153,7 +153,7 @@ function App() {
               />
               <Route
                 path="/my-collections"
-                element={<MyCollections address={walletAddress} signer={signer} />}
+                element={<MyCollections daoContract={daoContract} address={walletAddress} signer={signer} />}
               />
             </Routes>
           </Flex>

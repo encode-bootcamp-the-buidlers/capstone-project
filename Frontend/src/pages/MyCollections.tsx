@@ -3,13 +3,14 @@ import React, { useEffect, useState } from "react";
 import { Gallery } from "../components/Gallery";
 import { ContentWrapper } from "../components/PageWrapper";
 import { collections } from "../utils/collections";
-import { ethers, Signer } from "ethers";
+import { ethers} from "ethers";
 
 //import contracts
 import NftContract from "../contracts/nftContract.json"
 
 //types
 interface Props {
+  daoContract : ethers.Contract;
   address : string;
   signer: any;
 }
@@ -18,8 +19,10 @@ export function MyCollections(props:Props) {
   //state variables
   const [nftContract, setNftContract] = useState(new ethers.Contract(ethers.constants.AddressZero, []))
 
-  //connects to NFTToken smart contract and gets all data about nfts owned by logged in user
-  const connectToNftContract = async () => {
+  //initializes the first view of page 
+  const init = async () => {
+
+    //connects to NFTToken smart contract
     const nftContract = new ethers.Contract(NftContract.address, NftContract.abi, props.signer)
     setNftContract(nftContract)
 
@@ -29,21 +32,31 @@ export function MyCollections(props:Props) {
     if(balance.toNumber() === 0){
       alert("You do not own any items of collections which have won!")
     }else{
-      //get data of nfts owned by current user
-      const cids = []
+      //get meta data of nfts owned by current user + voteCount for each collection the user partially owns and has won during voting
+      const meta = []
       for(var i = 0; i<balance; i++){
         const id = await nftContract.tokenOfOwnerByIndex(props.address, i) //get token id
-        const uri = await nftContract.tokenURI(id) //get uri containing cid of ipfs file
-        cids.push(uri)
+        const uri = await nftContract.tokenURI(id) //get uri containing cid of ipfs file and other meta data
+        meta.push(uri)
+
+        // TODO get voteCount 
+         //const proposal = await = props.daoContract.proposals(id)
       }
-      console.log("nfts",cids)
+      console.log("nfts", meta)
     }    
+
+    
+    
   }
 
   useEffect(() => {
-    //connect to Ballot smart contract
-    connectToNftContract()
     
+    init()
+
+    //get nfts owned by logged in user which won the voting on platform
+
+    
+
     //get collections
     const getCollections = async () => {
       //get CID of items of each collection
@@ -51,6 +64,15 @@ export function MyCollections(props:Props) {
       //get issuer of each collection
     };
   }, []);
+
+  //functions
+  const getVoteResult = async () => {
+    try {
+      
+    } catch (error) {
+      console.log(error)
+    }
+  }
   return (
     <ContentWrapper>
       <Gallery
