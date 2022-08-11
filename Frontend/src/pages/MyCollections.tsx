@@ -64,7 +64,7 @@ export function MyCollections(props: Props) {
         artistName="T"
         percent={percents[0]}
       />
-      <Box>Congratulations!</Box>
+      <Box></Box>
     </ContentWrapper>
   );
 }
