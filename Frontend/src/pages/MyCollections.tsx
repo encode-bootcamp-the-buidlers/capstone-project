@@ -11,14 +11,10 @@ interface Props {
   daoContract: ethers.Contract;
 }
 
-interface Gallery {
-  index: number;
-  items?: string[];
-}
-
 export function MyCollections(props: Props) {
   const [collections, setCollections] = useState<any[]>([]);
   const [percents, setPercents] = useState<any[]>([]);
+  const [winningProposalIndex, setwinningProposalIndex] = useState<number>(0);
 
   useEffect(() => {
     //connect to Ballot smart contract
@@ -30,9 +26,10 @@ export function MyCollections(props: Props) {
       //get issuer of each collection
       try {
         const proposals = await props.daoContract.getAllProposals();
-        const winningProposalIndex =
-          await props.daoContract.getWinningProposal();
-        const ipfsFolderCID = proposals[winningProposalIndex].ipfsFolderCID;
+        const winningProposal = await props.daoContract.getWinningProposal();
+        setwinningProposalIndex(winningProposal);
+        // TODO: for now, we only have one winning collection
+        const ipfsFolderCID = proposals[winningProposal].ipfsFolderCID;
         const collection = await axios.get(
           "https://dweb.link/api/v0/ls?arg=" + ipfsFolderCID
         );
@@ -59,10 +56,8 @@ export function MyCollections(props: Props) {
         const votePercents = proposals.map((proposal: any) => {
           return (proposal.voteCount / totalVoteCount) * 100;
         });
-        // TODO: for now, we only have one winning collection
-        const winningCollectionIndex =
-          await props.daoContract.getWinningProposal();
-        setPercents(votePercents[winningCollectionIndex]);
+        console.log("votePercents", votePercents);
+        setPercents(votePercents);
       } catch (error) {
         console.log(error);
       }
@@ -75,7 +70,7 @@ export function MyCollections(props: Props) {
       <Gallery
         images={collections.map((item: any) => "https://ipfs.io/ipfs/" + item)}
         artistName="T"
-        percent={percents[0]}
+        percent={percents[winningProposalIndex]}
       />
       <Box></Box>
     </ContentWrapper>
