@@ -116,7 +116,7 @@ function App() {
         </Flex>
 
         {/* MAIN */}
-        <Flex w="full" h="calc(100% - 60px)" px={8} pt={8}>
+        <Flex w="full" h="calc(100% - 60px)" px={8} pt={4}>
           {/* NAVIGATION */}
           <Flex w={60} h="full" flexDir="column" gap={6}>
             <Link to="/vote">
