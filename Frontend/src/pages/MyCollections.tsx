@@ -15,9 +15,13 @@ interface Props {
   signer: any;
 }
 
+interface NFT {
+  meta_data? : any
+}
 export function MyCollections(props:Props) {
   //state variables
   const [nftContract, setNftContract] = useState(new ethers.Contract(ethers.constants.AddressZero, []))
+  const [nfts, setNfts] = useState<NFT[]>([])
 
   //initializes the first view of page 
   const init = async () => {
@@ -33,62 +37,48 @@ export function MyCollections(props:Props) {
       alert("You do not own any items of collections which have won!")
     }else{
       //get meta data of nfts owned by current user + voteCount for each collection the user partially owns and has won during voting
-      const meta = []
+      const owned_nfts = []
       for(var i = 0; i<balance; i++){
         const id = await nftContract.tokenOfOwnerByIndex(props.address, i) //get token id
-        const uri = await nftContract.tokenURI(id) //get uri containing cid of ipfs file and other meta data
-        meta.push(uri)
+        const meta_data = await nftContract.tokenURI(id) //get uri containing cid of ipfs file and other meta data
+        owned_nfts.push({meta_data :  meta_data})
 
         // TODO get voteCount 
          //const proposal = await = props.daoContract.proposals(id)
+
+        // TODO get issuer of collection
       }
-      console.log("nfts", meta)
+      console.log("owned nfts", owned_nfts)
     }    
 
     
     
   }
 
+  //on mount
   useEffect(() => {
-    
-    init()
-
-    //get nfts owned by logged in user which won the voting on platform
-
-    
-
-    //get collections
-    const getCollections = async () => {
-      //get CID of items of each collection
-      //get current amount of votes for each collection
-      //get issuer of each collection
-    };
+    init() //initilize getting crucial data for starting page of MyCollection
   }, []);
 
-  //functions
-  const getVoteResult = async () => {
-    try {
-      
-    } catch (error) {
-      console.log(error)
-    }
-  }
   return (
-    <ContentWrapper>
-      <Gallery
-        images={collections[0].items.map(
-          (item) => "https://ipfs.io/ipfs/" + item
-        )}
-        artistName="T"
-        percent={67}
-      />
-      <Gallery
-        images={collections[1].items.map(
-          (item) => "https://ipfs.io/ipfs/" + item
-        )}
-        artistName="K"
-        percent={43}
-      />
-    </ContentWrapper>
+    nfts ? 
+      <ContentWrapper>
+        <Gallery
+          images={collections[0].items.map(
+            (item) => "https://ipfs.io/ipfs/" + item
+          )}
+          artistName="T"
+          percent={67}
+        />
+        <Gallery
+          images={collections[1].items.map(
+            (item) => "https://ipfs.io/ipfs/" + item
+          )}
+          artistName="K"
+          percent={43}
+        />
+      </ContentWrapper>
+      :
+    <div>You do not own NFTs which one the voting!</div>
   );
 }
