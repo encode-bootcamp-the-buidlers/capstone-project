@@ -19,7 +19,6 @@ interface Gallery {
 export function MyCollections(props: Props) {
   const [collections, setCollections] = useState<any[]>([]);
   const [percents, setPercents] = useState<any[]>([]);
-  const [galleries, setGalleries] = useState<any[]>([]);
 
   useEffect(() => {
     //connect to Ballot smart contract
@@ -30,9 +29,23 @@ export function MyCollections(props: Props) {
       //get current amount of votes for each collection
       //get issuer of each collection
       try {
-        const collections = await props.daoContract.getAccountCollections();
-        setCollections(collections);
-        console.log("COLLECTIONS", collections);
+        const proposals = await props.daoContract.getAllProposals();
+        const winningProposalIndex =
+          await props.daoContract.getWinningProposal();
+        const ipfsFolderCID = proposals[winningProposalIndex].ipfsFolderCID;
+        const collection = await axios.get(
+          "https://dweb.link/api/v0/ls?arg=" + ipfsFolderCID
+        );
+        console.log("COLLECTION", collection);
+
+        // get CID of files in ipfs folder and store it in gaery object
+        const cids = [];
+        for (const item of collection["data"]["Objects"][0]["Links"]) {
+          if (item["Name"].includes("png")) {
+            cids.push(item["Hash"]);
+          }
+        }
+        setCollections(cids);
       } catch (error) {
         console.log(error);
       }
