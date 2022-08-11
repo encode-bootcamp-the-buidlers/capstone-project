@@ -12,6 +12,13 @@ import React from "react";
 import { ethers } from "ethers";
 import checkmark from "../assets/checkmark.svg";
 import AmountModal from "./AmountModal";
+import { toast } from "react-hot-toast";
+
+export const handleError = (error: any) => {
+  toast.error(
+    (error as { error?: Error }).error?.message ?? (error as Error).message
+  );
+};
 
 type GalleryProps = {
   images: string[];
@@ -33,7 +40,7 @@ export const Gallery: React.FC<GalleryProps> = ({
       try {
         await daoContract.vote(proposalIndex, amount);
       } catch (error) {
-        console.log("error", error);
+        handleError(error);
       }
     }
   };

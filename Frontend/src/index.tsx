@@ -4,6 +4,7 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { ChakraProvider, useColorMode } from "@chakra-ui/react";
+import { Toaster } from "react-hot-toast";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -15,12 +16,11 @@ function ForceLightMode(props: { children: JSX.Element }) {
   useEffect(() => {
     if (colorMode === "light") return;
     toggleColorMode();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [colorMode]);
 
   return props.children;
 }
-
 
 root.render(
   <ChakraProvider>
@@ -29,6 +29,16 @@ root.render(
         <App />
       </React.StrictMode>
     </ForceLightMode>
+    <Toaster
+      position="bottom-center"
+      toastOptions={{
+        style: {
+          borderRadius: "1rem",
+          maxWidth: "40rem",
+          marginBottom: "2rem",
+        },
+      }}
+    />
   </ChakraProvider>
 );
 

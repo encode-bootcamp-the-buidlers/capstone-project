@@ -50,7 +50,11 @@ function AmountModal({
             <Button
               colorScheme="blue"
               mr={3}
-              onClick={() => confirmationAction(Number(amount))}
+              onClick={() => {
+                confirmationAction(Number(amount));
+                onClose();
+                setAmount("");
+              }}
             >
               Vote
             </Button>
