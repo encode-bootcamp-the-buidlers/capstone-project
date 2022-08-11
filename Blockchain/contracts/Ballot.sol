@@ -45,6 +45,8 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   string[] public collectionTokenUris;
   uint256 public referenceBlock;
   uint256 private quorum;
+  uint256 public totalVoteCount;
+  uint256[] public votePercentages;
 
   /**
    * Use an interval in seconds and a timestamp to slow execution of Upkeep
@@ -110,6 +112,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     uint256 votingPowerUsed = amount * ethereumBase;
     require(votingPowerAvailable >= votingPowerUsed, "Has not enough voting power");
     proposals[proposal].voteCount += amount;
+    totalVoteCount += proposals[proposal].voteCount;
     sender.voted = true;
     sender.vote = proposal;
     totalVotes += amount;
@@ -225,5 +228,14 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
       "Voter didn't vote for the winning proposal. Therefore, won nothing"
     );
     return collectionTokenUris;
+  }
+
+  /// @dev another FE helper function. Return vote percentage for each proposal
+  function getVotePercentages() public returns (uint256[] memory) {
+    for (uint256 i = 0; i < proposals.length; i++) {
+      // HACK: Solidity doesn't support working with decimals. So we multiply by 10000
+      votePercentages.push((proposals[i].voteCount * 10000) / totalVoteCount);
+    }
+    return votePercentages;
   }
 }
