@@ -22,6 +22,7 @@ function App() {
   const [daoContract, setDaoContract] = useState(
     new ethers.Contract(ethers.constants.AddressZero, [])
   ); //necessary init due to TS
+  const [signer, setSigner] = useState<any>("");
   const [proposals, setProposals] = useState<any[]>([]);
   //functions
 
@@ -52,6 +53,7 @@ function App() {
 
     if (network.name === "rinkeby") {
       const signer = provider.getSigner();
+      setSigner(signer);
       console.log("signer", signer);
 
       const daoContract = new ethers.Contract(
@@ -152,7 +154,10 @@ function App() {
                 path="/vote"
                 element={<Vote daoContract={daoContract} />}
               />
-              <Route path="/my-collections" element={<MyCollections />} />
+              <Route
+                path="/my-collections"
+                element={<MyCollections signer={signer} />}
+              />
             </Routes>
           </Flex>
         </Flex>
