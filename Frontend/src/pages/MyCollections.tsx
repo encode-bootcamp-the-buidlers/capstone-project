@@ -3,8 +3,24 @@ import React, { useEffect } from "react";
 import { Gallery } from "../components/Gallery";
 import { ContentWrapper } from "../components/PageWrapper";
 import { collections } from "../utils/collections";
+import { ethers } from "ethers";
 
-export function MyCollections() {
+//import contracts
+import NftContract from "../contracts/nftContract.json"
+
+//types
+interface Props {
+  signer: any;
+}
+
+export function MyCollections(props:Props) {
+
+  
+
+  const connectToNFT = async () => {
+    const nftContract = new ethers.Contract(NftContract.address, NftContract.abi, props.signer)
+  }
+
   useEffect(() => {
     //connect to Ballot smart contract
 
