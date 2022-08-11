@@ -14,13 +14,15 @@ import vote from "./assets/vote.svg";
 import "./App.css";
 
 //import contracts
-import DaoContract from "./contracts/daoContract.json"
+import DaoContract from "./contracts/daoContract.json";
 
 function App() {
   //state variables
   const [walletAddress, setWalletAddress] = useState("");
-  const [daoContract, setDaoContract] = useState(new ethers.Contract(ethers.constants.AddressZero, [])); //necessary init due to TS
-  const [proposals, setProposals] = useState<any[]>([])
+  const [daoContract, setDaoContract] = useState(
+    new ethers.Contract(ethers.constants.AddressZero, [])
+  ); //necessary init due to TS
+  const [proposals, setProposals] = useState<any[]>([]);
   //functions
 
   //facilitates login process
@@ -43,38 +45,42 @@ function App() {
   //connect to smart contracts
   const connectToContracts = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
-    console.log("provider", provider)
+    console.log("provider", provider);
 
-    const network = await provider.getNetwork()
-    console.log("network", network)
+    const network = await provider.getNetwork();
+    console.log("network", network);
 
-    if(network.name === "rinkeby"){
-      const signer = provider.getSigner()
-      console.log("signer", signer)
+    if (network.name === "rinkeby") {
+      const signer = provider.getSigner();
+      console.log("signer", signer);
 
-      const daoContract = new ethers.Contract(DaoContract.address, DaoContract.abi, signer)
-      setDaoContract(daoContract)
-      console.log("Dao contract", daoContract)
+      const daoContract = new ethers.Contract(
+        DaoContract.address,
+        DaoContract.abi,
+        signer
+      );
+      setDaoContract(daoContract);
+      console.log("Dao contract", daoContract);
 
-      const totalSupply = await daoContract.totalSupply()
-      console.log("totalSupply", totalSupply)
+      const totalSupply = await daoContract.totalSupply();
+      console.log("totalSupply", totalSupply);
 
       //get on-chain proposal data
-      const proposals = await daoContract.getAllProposals()
-      setProposals(proposals)
-      console.log("First proposal", proposals[0])
+      const proposals = await daoContract.getAllProposals();
+      setProposals(proposals);
+      console.log("First proposal", proposals[0]);
     } else {
       alert(
         "DAO got talent is in development! Please connect to rinkeby test network to access website."
-      )
+      );
     }
-  }
+  };
 
   //triggers login and creates connection to dao contract
   const connectWallet = async () => {
     if (typeof window.ethereum !== "undefined") {
       await requestAccount(); // login
-      await connectToContracts() //connect to DAO contract
+      await connectToContracts(); //connect to DAO contract
     }
   };
 
@@ -103,12 +109,14 @@ function App() {
           {walletAddress !== "" ? (
             <Box className="metamask">Logged in as {walletAddress}</Box>
           ) : (
-            <Box className="metamask" onClick={connectWallet}>Wallet login</Box>
+            <Box className="metamask" onClick={connectWallet}>
+              Wallet login
+            </Box>
           )}
         </Flex>
 
         {/* MAIN */}
-        <Flex w="full" h="calc(100% - 60px)" px={8} pt={8}>
+        <Flex w="full" h="calc(100% - 60px)" px={8} pt={4}>
           {/* NAVIGATION */}
           <Flex w={60} h="full" flexDir="column" gap={6}>
             <Link to="/vote">
@@ -136,7 +144,10 @@ function App() {
           <Flex w="full" h="full" justifyContent="center">
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/vote" element={<Vote daoContract={daoContract}/>} />
+              <Route
+                path="/vote"
+                element={<Vote daoContract={daoContract} />}
+              />
               <Route path="/my-collections" element={<MyCollections />} />
             </Routes>
           </Flex>
