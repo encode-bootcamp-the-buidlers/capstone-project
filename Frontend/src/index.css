@@ -17,3 +17,11 @@ code {
 #root {
   height: 100%;
 }
+
+.metamask {
+  background-color: #007eff;
+  border-radius: 5px;
+  padding: 0.5rem;
+  color: #fff;
+  cursor: pointer;
+}

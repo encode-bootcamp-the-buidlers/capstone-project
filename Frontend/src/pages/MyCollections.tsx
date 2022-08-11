@@ -19,14 +19,14 @@ export function MyCollections() {
     <ContentWrapper>
       <Gallery
         images={collections[0].items.map(
-          (item) => "https://ipfs.infura.io/ipfs/" + item
+          (item) => "https://ipfs.io/ipfs/" + item
         )}
         artistName="T"
         percent={67}
       />
       <Gallery
         images={collections[1].items.map(
-          (item) => "https://ipfs.infura.io/ipfs/" + item
+          (item) => "https://ipfs.io/ipfs/" + item
         )}
         artistName="K"
         percent={43}
