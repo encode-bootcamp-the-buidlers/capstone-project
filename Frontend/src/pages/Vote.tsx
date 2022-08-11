@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Gallery } from "../components/Gallery";
 import { ContentWrapper } from "../components/PageWrapper";
-import { collections } from "../utils/collections";
 
 import { ethers } from "ethers";
 

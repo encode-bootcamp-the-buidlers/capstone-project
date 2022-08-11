@@ -6,10 +6,11 @@ import {
   GridItem,
   Image,
   Text,
+  useDisclosure,
 } from "@chakra-ui/react";
 import React from "react";
-import { ethers } from "ethers"
-import checkmark from "../assets/checkmark.svg"
+import { ethers } from "ethers";
+import checkmark from "../assets/checkmark.svg";
 import AmountModal from "./AmountModal";
 
 type GalleryProps = {
@@ -18,7 +19,7 @@ type GalleryProps = {
   percent?: number;
   daoContract?: ethers.Contract;
   proposalIndex?: number;
-}
+};
 
 export const Gallery: React.FC<GalleryProps> = ({
   images,
@@ -27,14 +28,16 @@ export const Gallery: React.FC<GalleryProps> = ({
   daoContract,
   proposalIndex,
 }) => {
-  const vote = async () => {
-    console.log("DAO Contract", daoContract)
+  const vote = async (amount: number) => {
     if (daoContract) {
-      // TODO: user has to select the amount of tokens they're going to vote with
-      // for now, hardcoded 10
-      await daoContract.vote(proposalIndex, 10)
+      try {
+        await daoContract.vote(proposalIndex, amount);
+      } catch (error) {
+        console.log("error", error);
+      }
     }
-  }
+  };
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
     <Flex flexDir="column">
@@ -56,17 +59,22 @@ export const Gallery: React.FC<GalleryProps> = ({
         {!percent && (
           <Flex gap={3}>
             <Button
-              onClick={() => vote()}
+              // onClick={() => vote()}
               borderRadius="full"
               borderColor="#20BE72"
               color="#20BE72"
               borderWidth={1}
               h={8}
               px={8}
+              onClick={onOpen}
             >
               Vote
             </Button>
-            <AmountModal/>
+            <AmountModal
+              onClose={onClose}
+              isOpen={isOpen}
+              confirmationAction={vote}
+            />
           </Flex>
         )}
       </Flex>
