@@ -62,7 +62,7 @@ export function Home() {
           Bitcoinera <ExternalLinkIcon mx="2px" />
         </Link>
         <Link href="https://github.com/Caruso33" isExternal>
-          Caruso23 <ExternalLinkIcon mx="2px" />
+          Caruso33 <ExternalLinkIcon mx="2px" />
         </Link>
         <Link href="https://github.com/sidlami" isExternal>
           Sid <ExternalLinkIcon mx="2px" />
