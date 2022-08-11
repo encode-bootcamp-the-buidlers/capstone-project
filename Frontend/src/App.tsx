@@ -67,9 +67,6 @@ function App() {
       const totalSupply = await daoContract.totalSupply();
       console.log("totalSupply", totalSupply);
 
-      const chairperson = await daoContract.chairperson();
-      console.log("chairperson", chairperson);
-
       //TODO: delete getting proposal data if it is obsolete due to implementation in Vote.ts
       //get on-chain proposal data
       const proposals = await daoContract.getAllProposals();
@@ -156,7 +153,7 @@ function App() {
               />
               <Route
                 path="/my-collections"
-                element={<MyCollections signer={signer} />}
+                element={<MyCollections address={walletAddress} signer={signer} />}
               />
             </Routes>
           </Flex>
