@@ -1,4 +1,4 @@
-# Dao's Got Talent - Encode Club final project
+# Dao's Got Talent - Encode Club Bootcamp final project
 
 ## Team: The Buidlers. 
 * Alok Sahay <alok.sahay87@gmail.com>
@@ -29,7 +29,11 @@ Dao's got talent is a talent finding DAO in the crowded NFT space. DAO members g
 * Timelocking of tokens before voting to avoid last minute buy in
 * DAOGT token required for artists to participate with their collection to avoid spam.
 
+## Explorer links
+
 DAOGT token: https://rinkeby.etherscan.io/token/0x0184a705f7801f8a8a31ffd0712e315979ceb4fd
+
 Governance contract: https://rinkeby.etherscan.io/address/0x666dbd201c02d584c8614ebc45555a10dc4cdcdd
+
 Winning NFT collection: https://rinkeby.etherscan.io/token/0x58073f5394ded4f0e77d6d76cd338e4e38f60aaf
 
