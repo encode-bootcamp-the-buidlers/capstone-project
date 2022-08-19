@@ -10,7 +10,7 @@
 
 ## Objective
 
-Dao's got talent is a talent finding DAO in the crowded NFT space. DAO members get to vote on NFT collection and the winning collection gets minted. The top members who voted for the winning collection get an airdrop when the collection is live. The automated minting and airdrop is triggered by a Chainlink Keeper.
+Dao's got talent is a talent finding DAO in the crowded NFT space. DAO members view and vote on contesting NFT collections and upon conclusion the winning collection gets automatically minted. The top members who voted for the winning collection receive an NFT airdrop when the collection goes live. The automated minting and airdrop is triggered by a Chainlink Keeper.
 
 ## How it works
 
