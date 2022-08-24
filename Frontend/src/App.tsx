@@ -30,7 +30,7 @@ function App() {
             <Flex w="full" h="full" justifyContent="center">
               <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/voting-overview" element={<VotingOverview />} />
+                {/* <Route path="/voting-overview" element={<VotingOverview />} /> */}
                 <Route path="/vote" element={<Vote />} />
                 <Route path="/my-collections" element={<MyCollections />} />
               </Routes>
