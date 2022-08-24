@@ -1,9 +1,9 @@
-import { Flex } from "@chakra-ui/react";
-import React from "react";
+import { Flex } from "@chakra-ui/react"
+import React from "react"
 
-export const ContentWrapper: React.FC<{ children: JSX.Element[] }> = ({
-  children,
-}) => {
+export const ContentWrapper: React.FC<{
+  children: JSX.Element[] | JSX.Element
+}> = ({ children }) => {
   return (
     <Flex h="full" w="full">
       <Flex
@@ -20,5 +20,5 @@ export const ContentWrapper: React.FC<{ children: JSX.Element[] }> = ({
         {children}
       </Flex>
     </Flex>
-  );
-};
+  )
+}

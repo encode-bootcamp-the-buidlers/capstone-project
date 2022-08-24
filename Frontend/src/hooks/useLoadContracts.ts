@@ -35,10 +35,10 @@ export default function useLoadContracts() {
       console.log("Dao contract", daoContract)
 
       const totalSupply = await daoContract.totalSupply()
-      console.log("totalSupply", totalSupply)
+      console.log("totalSupply", totalSupply.toString())
 
       //get on-chain proposal data
-      const proposals = await daoContract.proposals()
+      const proposals = await daoContract.getAllProposals()
       console.log("proposals", proposals)
     }
 
