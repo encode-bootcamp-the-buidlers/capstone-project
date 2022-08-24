@@ -1,6 +1,7 @@
-import { Spinner } from "@chakra-ui/react"
+import { Box, Spinner, Text } from "@chakra-ui/react"
 import axios from "axios"
 import { useContext, useEffect, useState } from "react"
+import { useAccount } from "wagmi"
 import { Gallery } from "../components/Gallery"
 import { ContentWrapper } from "../components/PageWrapper"
 import StateContext from "../state/stateContext"
@@ -10,12 +11,15 @@ interface Props {}
 export function MyCollections(props: Props) {
   const { daoContract } = useContext(StateContext)
 
+  const { address } = useAccount()
+
   const [collections, setCollections] = useState<any[]>([])
   const [isCollectionsLoading, setIsCollectionsLoading] =
     useState<boolean>(false)
 
   const [percents, setPercents] = useState<number[]>([])
   const [winningProposalIndex, setwinningProposalIndex] = useState<number>(0)
+  const [proposalVoters, setProposalVoters] = useState([])
 
   useEffect(() => {
     //connect to Ballot smart contract
@@ -53,9 +57,18 @@ export function MyCollections(props: Props) {
       }
     }
 
+    getCollections()
+  }, [
+    collections.length,
+    daoContract,
+    isCollectionsLoading,
+    winningProposalIndex,
+  ])
+
+  useEffect(() => {
     const getPercentages = async () => {
       // get percentages of each collection
-      if (!daoContract || percents.length > 0 || isCollectionsLoading) return
+      if (!daoContract || percents.length > 0) return
 
       try {
         const proposals = await daoContract.getAllProposals()
@@ -75,13 +88,28 @@ export function MyCollections(props: Props) {
       }
     }
 
-    getCollections()
     getPercentages()
+  }, [daoContract, isCollectionsLoading, percents.length])
+
+  useEffect(() => {
+    const getProposalVoters = async () => {
+      if (!daoContract || proposalVoters.length > 0) return
+
+      try {
+        const voters = await daoContract.getVotersForProposal(
+          winningProposalIndex
+        )
+        setProposalVoters(voters)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
+    getProposalVoters()
   }, [
-    collections.length,
     daoContract,
-    isCollectionsLoading,
     percents.length,
+    proposalVoters.length,
     winningProposalIndex,
   ])
 
@@ -89,6 +117,8 @@ export function MyCollections(props: Props) {
     <ContentWrapper>
       {isCollectionsLoading ? (
         <Spinner />
+      ) : !proposalVoters.includes(address) ? (
+        <Text>You haven't voted for a winning collection yet. Good luck!</Text>
       ) : (
         <Gallery
           images={collections
