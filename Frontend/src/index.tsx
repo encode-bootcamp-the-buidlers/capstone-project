@@ -1,4 +1,4 @@
-import { ChakraProvider, useColorMode } from "@chakra-ui/react"
+import { ChakraProvider, LightMode, useColorMode } from "@chakra-ui/react"
 import React, { useEffect } from "react"
 import ReactDOM from "react-dom/client"
 import { Toaster } from "react-hot-toast"
@@ -9,37 +9,25 @@ import reportWebVitals from "./reportWebVitals"
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement)
 
-function ForceLightMode(props: { children: JSX.Element }) {
-  const { colorMode, toggleColorMode } = useColorMode()
-
-  useEffect(() => {
-    if (colorMode === "light") return
-    toggleColorMode()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [colorMode])
-
-  return props.children
-}
-
 root.render(
   <ChakraProvider>
     <Web3>
-      <ForceLightMode>
+      <LightMode>
         <React.StrictMode>
           <App />
         </React.StrictMode>
-      </ForceLightMode>
-      
-      <Toaster
-        position="bottom-center"
-        toastOptions={{
-          style: {
-            borderRadius: "1rem",
-            maxWidth: "40rem",
-            marginBottom: "2rem",
-          },
-        }}
-      />
+
+        <Toaster
+          position="bottom-center"
+          toastOptions={{
+            style: {
+              borderRadius: "1rem",
+              maxWidth: "40rem",
+              marginBottom: "2rem",
+            },
+          }}
+        />
+      </LightMode>
     </Web3>
   </ChakraProvider>
 )

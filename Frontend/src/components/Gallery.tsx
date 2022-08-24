@@ -23,8 +23,8 @@ export const handleError = (error: any) => {
 type GalleryProps = {
   images: string[];
   artistName: string;
+  daoContract?: null | ethers.Contract;
   percent?: number;
-  daoContract?: ethers.Contract;
   proposalIndex?: number;
 };
 

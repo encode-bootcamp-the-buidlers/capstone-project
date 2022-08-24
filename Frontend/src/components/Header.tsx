@@ -4,8 +4,11 @@ import { Link } from "react-router-dom"
 import { useAccount, useConnect, useDisconnect } from "wagmi"
 import { InjectedConnector } from "wagmi/connectors/injected"
 import logo from "../assets/logo.svg"
+import useLoadContracts from "../hooks/useLoadContracts"
 
 function Header() {
+  useLoadContracts()
+
   const { connect } = useConnect({
     connector: new InjectedConnector(),
   })
@@ -34,7 +37,9 @@ function Header() {
       {isConnected ? (
         <Flex alignItems={"center"}>
           <Box>Logged in as {address}</Box>
-          <Button ml={5} onClick={() => disconnect()}>Logout</Button>
+          <Button ml={5} onClick={() => disconnect()}>
+            Logout
+          </Button>
         </Flex>
       ) : (
         <Button onClick={() => connect()}>Wallet login</Button>

@@ -1,6 +1,6 @@
 import { Flex, VStack } from "@chakra-ui/react"
 import { ethers } from "ethers"
-import React, { useState } from "react"
+import { useState } from "react"
 import { Route, Routes } from "react-router"
 import { BrowserRouter } from "react-router-dom"
 import Header from "./components/Header"
@@ -12,9 +12,8 @@ import VotingOverview from "./pages/Voting-Overview"
 import StateContext from "./state/stateContext"
 
 function App() {
-  const [daoContract, setDaoContract] = useState(
-    new ethers.Contract(ethers.constants.AddressZero, [])
-  ) //necessary init due to TS
+  const [daoContract, setDaoContract] = useState<null | ethers.Contract>(null)
+  // new ethers.Contract(ethers.constants.AddressZero, []) //necessary init due to TS
 
   return (
     <BrowserRouter>
@@ -28,7 +27,6 @@ function App() {
           <Header />
 
           <Sidebar>
-            {/* CONTENT */}
             <Flex w="full" h="full" justifyContent="center">
               <Routes>
                 <Route path="/" element={<Home />} />

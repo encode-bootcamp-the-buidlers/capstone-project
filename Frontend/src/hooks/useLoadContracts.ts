@@ -23,10 +23,11 @@ export default function useLoadContracts() {
         return
       }
 
-      if (!signer) return
+      if (!signer || !chain?.id) return
+
       const daoContract = new ethers.Contract(
-        DaoContract.address,
-        DaoContract.abi,
+        (DaoContract as any)[chain.id.toString()].address,
+        (DaoContract as any)[chain.id.toString()].abi,
         signer
       )
 

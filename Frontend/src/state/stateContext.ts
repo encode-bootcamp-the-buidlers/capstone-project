@@ -2,8 +2,8 @@ import { ethers } from "ethers"
 import React from "react"
 
 type ContextInterface = {
-  daoContract: ethers.Contract
-  setDaoContract: React.Dispatch<React.SetStateAction<ethers.Contract>>
+  daoContract: null | ethers.Contract
+  setDaoContract: React.Dispatch<React.SetStateAction<ethers.Contract | null>>
 }
 
 // @ts-ignore

@@ -1,6 +1,6 @@
 import { Box } from "@chakra-ui/react"
 import axios from "axios"
-import React, { useContext, useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { Gallery } from "../components/Gallery"
 import { ContentWrapper } from "../components/PageWrapper"
 import StateContext from "../state/stateContext"
@@ -19,6 +19,8 @@ export function MyCollections(props: Props) {
 
     //get collections
     const getCollections = async () => {
+      if (!daoContract) return
+
       //get CID of items of each collection
       //get current amount of votes for each collection
       //get issuer of each collection
@@ -50,6 +52,8 @@ export function MyCollections(props: Props) {
     }
     const getPercentages = async () => {
       // get percentages of each collection
+      if (!daoContract) return
+
       try {
         const proposals = await daoContract.getAllProposals()
         // get the total vount count
@@ -65,7 +69,7 @@ export function MyCollections(props: Props) {
     }
     getCollections()
     getPercentages()
-  }, [])
+  }, [daoContract])
   return (
     <ContentWrapper>
       <Gallery

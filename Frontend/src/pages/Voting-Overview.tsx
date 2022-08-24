@@ -7,20 +7,18 @@ function VotingOverview() {
 
   const [currentWinningProposal, setCurrentWinningProposal] = useState("")
 
-  console.dir(daoContract)
+  // useEffect(() => {
+  //   async function loadDAOInfo() {
+  //     if (daoContract && !currentWinningProposal) {
+  //       console.dir(daoContract)
+  //       const winningProposal = await daoContract.getWinningProposal()
+  //       console.log("Current winning proposal:", winningProposal.toString())
+  //       setCurrentWinningProposal(winningProposal.toString())
+  //     }
+  //   }
 
-  useEffect(() => {
-    async function loadDAOInfo() {
-      if (daoContract && !currentWinningProposal) {
-        console.dir(daoContract)
-        const winningProposal = await daoContract.getWinningProposal()
-        console.log("Current winning proposal:", winningProposal.toString())
-        setCurrentWinningProposal(winningProposal.toString())
-      }
-    }
-
-    loadDAOInfo()
-  }, [daoContract, currentWinningProposal])
+  //   loadDAOInfo()
+  // }, [daoContract, currentWinningProposal])
 
   return <Box>Current winning proposal: {currentWinningProposal}</Box>
 }

@@ -22,7 +22,7 @@ export function Vote(props: Props) {
     const getProposedCollections = async () => {
       try {
         //get proposal data
-        const proposals = await daoContract.getAllProposals()
+        const proposals = await daoContract?.getAllProposals()
         setProposals(proposals)
 
         // get collection from ipfs and store it in galleries array
