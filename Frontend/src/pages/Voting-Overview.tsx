@@ -7,6 +7,14 @@ function VotingOverview() {
 
   const [currentWinningProposal, setCurrentWinningProposal] = useState("")
 
+  // TODO: This component is here to show some basic metrics for the current ballot
+  // like proposal count, proposal owners
+  // collection preview?
+  // voting count on the collections
+  // total votes until now
+  // eligible voting count
+  // more?
+
   // useEffect(() => {
   //   async function loadDAOInfo() {
   //     if (daoContract && !currentWinningProposal) {
