@@ -1,6 +1,6 @@
 import "dotenv/config"
 import { ethers, BigNumber } from "ethers"
-import * as ballotJson from "../artifacts/contracts/Ballot.sol/Ballot.json"
+import * as daoJson from "../artifacts/contracts/DAO.sol/DAO.json"
 import { getSignerProvider, getWallet } from "./utils/utils"
 
 async function main() {
@@ -18,10 +18,10 @@ async function main() {
 
   const { signer } = getSignerProvider(wallet, network)
 
-  const ballotContract = new ethers.Contract(contractAddress, ballotJson.abi, signer)
+  const daoContract = new ethers.Contract(contractAddress, daoJson.abi, signer)
 
-  console.log("Granting Chainlink Keeper access rights to Ballot contract")
-  const tx = await ballotContract.setKeeperRegistryAddress(keeperAddress)
+  console.log("Granting Chainlink Keeper access rights to dao contract")
+  const tx = await daoContract.setKeeperRegistryAddress(keeperAddress)
   await tx.wait()
   console.log(`Keeper address successfully set in transaction ${tx.hash}`)
 }

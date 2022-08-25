@@ -12,10 +12,10 @@ interface IERC20Votes {
 }
 
 /// @dev custom errors
-error Ballot__Ipfs_CIDs_CollectionSize_Mismatch();
+error DAO__Ipfs_CIDs_CollectionSize_Mismatch();
 error OnlyKeeperRegistry();
 
-contract Ballot is KeeperCompatibleInterface, NFTContract {
+contract DAO is KeeperCompatibleInterface, NFTContract {
   using Strings for uint256;
 
   // This declares a new complex type which will
@@ -31,18 +31,30 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     uint256 index; // index for the NFT collection
     uint256 voteCount; // number of accumulated votes
     uint256 collectionSize; // number of items in collection starting from 0
-    bool active; // the proposal is still being voted on
     string ipfsFolderCID;
+  }
+
+  // This is a type for a voting round
+  struct Round {
+    uint256 index; // index for the proposal
+    Proposal[] proposals; // proposed collections to vote on
+    bool active; // the round is still being voted
   }
 
   uint256 private totalVotes = 0;
   mapping(address => Voter) public voters;
   // mapping to link the proposalIndex to its voters
   mapping(uint256 => address[]) public proposalVoters;
+  // mapping to link a collection to its voting round
+  mapping(uint256 => uint256) public proposalRound;
+  // mapping to link a voting round to the proposed collection indexes
+  mapping(uint256 => uint256[]) public roundProposals;
 
   Proposal[] public proposals;
+  Round[] public rounds;
   IERC20Votes public voteToken;
   string[] public collectionTokenUris;
+  uint256 public lastRoundIndex;
   uint256 public referenceBlock;
   uint256 private quorum;
 
@@ -78,7 +90,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     uint256 _quorum
   ) {
     if (_ipfsFolderCIDs.length != _collectionsSize.length)
-      revert Ballot__Ipfs_CIDs_CollectionSize_Mismatch();
+      revert DAO__Ipfs_CIDs_CollectionSize_Mismatch();
 
     interval = 1 minutes; // for testing purposes
     lastTimeStamp = block.timestamp;
@@ -93,18 +105,21 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
         Proposal({
           index: i,
           voteCount: 0,
-          active: true,
           ipfsFolderCID: _ipfsFolderCIDs[i],
           collectionSize: _collectionsSize[i]
         })
       );
+      proposalRound[i] = 0;
+      roundProposals[0].push(i);
     }
+    rounds.push(Round({index: 0, proposals: proposals, active: true}));
+    lastRoundIndex = 0;
   }
 
   /// Give your vote to proposal `proposals[proposal].index`.
   function vote(uint256 proposal, uint256 amount) external {
     Voter storage sender = voters[msg.sender];
-    require(proposals[proposal].active, "Proposal voting period ended");
+    require(rounds[proposalRound[proposal]].active, "Proposal voting period ended");
     require(!sender.voted, "Already voted.");
     uint256 votingPowerAvailable = votingPower();
     uint256 votingPowerUsed = amount * ethereumBase;
@@ -119,25 +134,40 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     proposalVoters[proposal].push(msg.sender);
   }
 
-  /// @dev Computes the winning proposal taking all
-  /// previous votes into account.
-  function getWinningProposal() public view returns (uint256 winningProposal_) {
+  // start a new voting round with proposals/collections to vote on
+  function startRound(Proposal[] memory proposals) external {
+    // TODO: needs to check that the proposal indexes are unique
+    rounds.push(Round({index: lastRoundIndex + 1, proposals: proposals, active: true}));
+    lastRoundIndex++;
+    for (uint256 i = 0; i < proposals.length; i++) {
+      proposalRound[proposals[i].index] = lastRoundIndex;
+      roundProposals[lastRoundIndex].push(proposals[i].index);
+    }
+  }
+
+  /// @dev Computes the winning proposal taking all previous votes into account.
+  /// receives the index of the voting round we want to know the result of
+  function getWinningProposal(uint256 roundIndex) public view returns (uint256 winningProposal_) {
     uint256 winningVoteCount = 0;
+    uint256[] memory proposalIndexes = roundProposals[
+      roundIndex == 0 ? lastRoundIndex : roundIndex
+    ];
     // Gas optimization
     Proposal[] memory localProposals = proposals;
-    for (uint256 p = 0; p < localProposals.length; p++) {
-      if (localProposals[p].voteCount > winningVoteCount) {
-        winningVoteCount = localProposals[p].voteCount;
+    for (uint256 p = 0; p < proposalIndexes.length; p++) {
+      if (localProposals[proposalIndexes[p]].voteCount > winningVoteCount) {
+        winningVoteCount = localProposals[proposalIndexes[p]].voteCount;
         winningProposal_ = p;
       }
     }
   }
 
-  // Calls getWinningProposal() function to get the index
-  // of the winner contained in the proposals array and then
-  // returns the index of the winner
-  function winnerIndex() external view returns (uint256 winnerIndex_) {
-    winnerIndex_ = proposals[getWinningProposal()].index;
+  // Calls getWinningProposal() function to get the index of the winner contained
+  // in the proposals array and then returns the index of the winner
+  // receives the index of the voting round we want to know the result of
+  function winnerIndex(uint256 roundIndex) external view returns (uint256 winnerIndex_) {
+    uint256 index = roundIndex == 0 ? lastRoundIndex : roundIndex;
+    winnerIndex_ = proposals[getWinningProposal(index)].index;
   }
 
   /// @dev the voting power has 18 decimal units
@@ -168,14 +198,14 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     require(upkeepNeeded, "The time to elapse and/or quorum hasn't been met.");
 
     lastTimeStamp = block.timestamp;
-    Proposal storage winningProposal = proposals[getWinningProposal()];
+    Proposal storage winningProposal = proposals[getWinningProposal(lastRoundIndex)];
 
     string memory prefix = string(abi.encodePacked("ipfs://", winningProposal.ipfsFolderCID));
 
     uint256 collectionLength = winningProposal.collectionSize;
     uint256 winningProposalIndex = winningProposal.index;
-    // Close voting period for the winning proposal
-    proposals[winningProposalIndex].active = false;
+    // Close voting round for the set of proposals with a winning proposal
+    rounds[proposalRound[proposals[winningProposalIndex].index]].active = false;
 
     for (uint256 i = 0; i < collectionLength; i++) {
       string memory suffix = string(abi.encodePacked(i.toString(), ".json"));
@@ -218,8 +248,10 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
 
   /// @dev currently only one collection
   function getAccountCollections() public view returns (string[] memory) {
-    Proposal storage winningProposal = proposals[getWinningProposal()];
-    require(!winningProposal.active, "Voting is still ongoing");
+    // TODO: needs to iterate through every round and check if the account
+    // voted to any winning collection
+    Proposal storage winningProposal = proposals[getWinningProposal(lastRoundIndex)];
+    require(!rounds[proposalRound[winningProposal.index]].active, "Voting is still ongoing");
     require(
       voters[msg.sender].vote == winningProposal.index,
       "Voter didn't vote for the winning proposal. Therefore, won nothing"

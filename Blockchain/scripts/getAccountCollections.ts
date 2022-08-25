@@ -1,5 +1,5 @@
 import { ethers } from "ethers"
-import * as ballotJson from "../artifacts/contracts/Ballot.sol/Ballot.json"
+import * as daoJson from "../artifacts/contracts/DAO.sol/DAO.json"
 import { getSignerProvider, getWallet } from "./utils/utils"
 
 async function main() {
@@ -13,9 +13,9 @@ async function main() {
 
   const { signer } = getSignerProvider(wallet, network)
 
-  const ballotContract = new ethers.Contract(contractAddress, ballotJson.abi, signer)
+  const daoContract = new ethers.Contract(contractAddress, daoJson.abi, signer)
   console.log("Getting account NFT collections")
-  const nftCollections = await ballotContract.getAccountCollections()
+  const nftCollections = await daoContract.getAccountCollections()
   console.log(`The account owns the following NFT collection(s): ${nftCollections}`)
 }
 

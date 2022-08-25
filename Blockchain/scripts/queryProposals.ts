@@ -1,6 +1,6 @@
 import "dotenv/config"
 import { ethers } from "ethers"
-import * as ballotJson from "../artifacts/contracts/Ballot.sol/Ballot.json"
+import * as daoJson from "../artifacts/contracts/DAO.sol/DAO.json"
 import { getSignerProvider, getWallet } from "./utils/utils"
 
 async function main() {
@@ -14,13 +14,13 @@ async function main() {
 
   const { signer } = getSignerProvider(wallet, network)
 
-  const ballotContract = new ethers.Contract(contractAddress, ballotJson.abi, signer)
+  const daoContract = new ethers.Contract(contractAddress, daoJson.abi, signer)
 
   let index = 0
   let hasProposal = true
   while (hasProposal) {
     try {
-      const proposal = await ballotContract.proposals(index)
+      const proposal = await daoContract.proposals(index)
 
       const proposalString = ethers.utils.parseBytes32String(proposal.name)
       const proposalVoteCount = proposal.voteCount

@@ -1,6 +1,6 @@
 import "dotenv/config"
 import { ethers } from "ethers"
-import * as ballotJson from "../artifacts/contracts/Ballot.sol/Ballot.json"
+import * as daoJson from "../artifacts/contracts/DAO.sol/DAO.json"
 import { getSignerProvider, getWallet } from "./utils/utils"
 
 async function main() {
@@ -22,17 +22,17 @@ async function main() {
 
   const { signer } = getSignerProvider(wallet, network)
 
-  const ballotContract = new ethers.Contract(contractAddress, ballotJson.abi, signer)
+  const daoContract = new ethers.Contract(contractAddress, daoJson.abi, signer)
 
-  const currentProposal = await ballotContract.proposals(proposalIndex)
+  const currentProposal = await daoContract.proposals(proposalIndex)
   console.log(
     `Casting vote on proposal with index : ${proposalIndex}, current vote count : ${currentProposal.voteCount}`
   )
-  const tx = await ballotContract.vote(proposalIndex, amount)
+  const tx = await daoContract.vote(proposalIndex, amount)
   console.log("Awaiting confirmations")
   await tx.wait()
   console.log("Fetching updated data for new proposal")
-  const updatedProposal = await ballotContract.proposals(proposalIndex)
+  const updatedProposal = await daoContract.proposals(proposalIndex)
   console.log(
     `Proposal with index ${proposalIndex}, new vote count : ${updatedProposal.voteCount}, tx hash : ${tx.hash}`
   )

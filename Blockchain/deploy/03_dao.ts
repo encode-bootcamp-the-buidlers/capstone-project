@@ -1,11 +1,11 @@
 import { DeployFunction } from "hardhat-deploy/types"
 import { HardhatRuntimeEnvironment } from "hardhat/types"
-import { ballotConfig, developmentChains, networkConfig } from "../hardhat-helper-config"
+import { daoConfig, developmentChains, networkConfig } from "../hardhat-helper-config"
 import verify from "../scripts/utils/verify"
 import { BigNumber } from "ethers"
 import { ethers } from "hardhat"
 
-const deployBallot: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+const deployDAO: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // @ts-ignore
   const { getNamedAccounts, deployments, network } = hre
   const { deploy, log, get } = deployments
@@ -14,16 +14,16 @@ const deployBallot: DeployFunction = async function (hre: HardhatRuntimeEnvironm
   const governanceTokenContract = await ethers.getContract("GovernanceToken")
 
   log("----------------------------------------------------")
-  log("Deploying Ballot and waiting for confirmations...")
+  log("Deploying DAO and waiting for confirmations...")
 
   const args = [
     governanceToken.address,
-    ballotConfig.ipfsFolderCIDs,
-    ballotConfig.collectionsSize,
-    ballotConfig.quorum,
+    daoConfig.ipfsFolderCIDs,
+    daoConfig.collectionsSize,
+    daoConfig.quorum,
   ]
 
-  const Ballot = await deploy("Ballot", {
+  const DAO = await deploy("DAO", {
     from: deployer,
     args,
     log: true,
@@ -31,17 +31,17 @@ const deployBallot: DeployFunction = async function (hre: HardhatRuntimeEnvironm
     waitConfirmations: networkConfig[network.name].blockConfirmations || 1,
   })
 
-  log(`Ballot at ${Ballot.address}`)
+  log(`DAO at ${DAO.address}`)
 
-  // set Ballot as the admin of the governance token contract
-  governanceTokenContract.setRoles(deployer, Ballot.address)
+  // set DAO as the admin of the governance token contract
+  governanceTokenContract.setRoles(deployer, DAO.address)
   // mint governance tokens for the chaiperson
   governanceTokenContract.mint(deployer, BigNumber.from(1000).mul(BigNumber.from(10).pow(18)))
 
   if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
-    await verify(Ballot.address, args)
+    await verify(DAO.address, args)
   }
 }
 
-export default deployBallot
-deployBallot.tags = ["all", "ballot"]
+export default deployDAO
+deployDAO.tags = ["all", "DAO"]
