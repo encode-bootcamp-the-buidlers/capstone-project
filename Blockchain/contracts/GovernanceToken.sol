@@ -14,7 +14,7 @@ contract GovernanceToken is ERC20, ERC20Burnable, AccessControl, ERC20Permit, ER
   bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
   bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
 
-  address private ballotAddress;
+  address private daoAddress;
 
   constructor(string memory _name, string memory _symbol) ERC20(_name, _symbol) ERC20Permit(_name) {
     _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -55,11 +55,11 @@ contract GovernanceToken is ERC20, ERC20Burnable, AccessControl, ERC20Permit, ER
   }
 
   /// @dev The deployer of the contract chooses the minter and burner accounts
-  /// In our deployment script, the deployer is the minter and the Ballot contract the burner
-  function setRoles(address _minter, address _ballotAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(_ballotAddress != address(0));
-    ballotAddress = _ballotAddress;
+  /// In our deployment script, the deployer is the minter and the DAO contract the burner
+  function setRoles(address _minter, address _daoAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(_daoAddress != address(0));
+    daoAddress = _daoAddress;
     _grantRole(MINTER_ROLE, _minter);
-    _grantRole(BURNER_ROLE, _ballotAddress);
+    _grantRole(BURNER_ROLE, _daoAddress);
   }
 }

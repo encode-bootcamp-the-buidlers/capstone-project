@@ -19,7 +19,7 @@ export const networkConfig: networkConfigInfo = {
 
 export const developmentChains = ["hardhat", "localhost"]
 
-export const ballotConfig = {
+export const daoConfig = {
   ipfsFolderCIDs: [
     // IMPORTANT! leave the trailing slash to indicate it's a folder
     "QmUMm4SdH9XVBvAhf2uAyx9tPJqQR4mgvYELzhn2qdS1mz/",

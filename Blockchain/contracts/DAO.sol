@@ -12,10 +12,10 @@ interface IERC20Votes {
 }
 
 /// @dev custom errors
-error Ballot__Ipfs_CIDs_CollectionSize_Mismatch();
+error DAO__Ipfs_CIDs_CollectionSize_Mismatch();
 error OnlyKeeperRegistry();
 
-contract Ballot is KeeperCompatibleInterface, NFTContract {
+contract DAO is KeeperCompatibleInterface, NFTContract {
   using Strings for uint256;
 
   // This declares a new complex type which will
@@ -78,7 +78,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     uint256 _quorum
   ) {
     if (_ipfsFolderCIDs.length != _collectionsSize.length)
-      revert Ballot__Ipfs_CIDs_CollectionSize_Mismatch();
+      revert DAO__Ipfs_CIDs_CollectionSize_Mismatch();
 
     interval = 1 minutes; // for testing purposes
     lastTimeStamp = block.timestamp;

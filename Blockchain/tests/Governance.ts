@@ -1,6 +1,6 @@
 import { assert } from "chai"
 import { deployments, ethers } from "hardhat"
-import { ballotConfig } from "../hardhat-helper-config"
+import { daoConfig } from "../hardhat-helper-config"
 import { GovernanceToken } from "../typechain-types/contracts/GovernanceToken"
 
 describe("GovernanceToken", async () => {

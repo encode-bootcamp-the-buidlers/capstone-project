@@ -1,6 +1,6 @@
 import "dotenv/config"
 import { ethers, BigNumber } from "ethers"
-import * as ballotJson from "../artifacts/contracts/Ballot.sol/Ballot.json"
+import * as daoJson from "../artifacts/contracts/dao.sol/dao.json"
 import { getSignerProvider, getWallet } from "./utils/utils"
 
 async function main() {
@@ -14,10 +14,10 @@ async function main() {
 
   const { signer } = getSignerProvider(wallet, network)
 
-  const ballotContract = new ethers.Contract(contractAddress, ballotJson.abi, signer)
+  const daoContract = new ethers.Contract(contractAddress, daoJson.abi, signer)
 
   console.log("Checking checkUpkeep")
-  const checkUpkeep = await ballotContract.checkUpkeep(0x0)
+  const checkUpkeep = await daoContract.checkUpkeep(0x0)
   console.log(`checkUpkeep is ${checkUpkeep}`)
 }
 

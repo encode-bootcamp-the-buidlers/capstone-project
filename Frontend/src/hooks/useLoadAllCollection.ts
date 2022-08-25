@@ -1,12 +1,12 @@
-import axios from "axios"
-import React, { useContext } from "react"
-import StateContext from "../state/stateContext"
+import axios from "axios";
+import React, { useContext } from "react";
+import StateContext from "../state/stateContext";
 
 interface Props {
-  collections: any[]
-  setCollections: any
-  isCollectionsLoading: boolean
-  setIsCollectionsLoading: any
+  collections: any[];
+  setCollections: any;
+  isCollectionsLoading: boolean;
+  setIsCollectionsLoading: any;
 }
 
 export default function useLoadAllCollections({
@@ -15,50 +15,51 @@ export default function useLoadAllCollections({
   isCollectionsLoading,
   setIsCollectionsLoading,
 }: Props) {
-  const { daoContract } = useContext(StateContext)
+  const { daoContract } = useContext(StateContext);
 
   React.useEffect(() => {
-    //connect to Ballot smart contract
+    //connect to DAO smart contract
 
     //get collections
     const getCollections = async () => {
-      if (!daoContract || collections.length > 0 || isCollectionsLoading) return
+      if (!daoContract || collections.length > 0 || isCollectionsLoading)
+        return;
 
       //get CID of items of each collection
       //get current amount of votes for each collection
       //get issuer of each collection
       try {
-        setIsCollectionsLoading(true)
+        setIsCollectionsLoading(true);
 
-        const collections = []
-        const proposals = await daoContract.getAllProposals()
+        const collections = [];
+        const proposals = await daoContract.getAllProposals();
 
         for (const proposal of proposals) {
-          const ipfsFolderCID = proposal.ipfsFolderCID
+          const ipfsFolderCID = proposal.ipfsFolderCID;
 
           const { data } = await axios.get(
             `https://dweb.link/api/v0/ls?arg=${ipfsFolderCID}`
-          )
+          );
 
-          const collection = data?.["Objects"]?.[0]?.["Links"] || []
+          const collection = data?.["Objects"]?.[0]?.["Links"] || [];
 
-          collections.push(collection)
+          collections.push(collection);
         }
 
-        setCollections(collections)
+        setCollections(collections);
       } catch (error) {
-        console.log(error)
+        console.log(error);
       } finally {
-        setIsCollectionsLoading(false)
+        setIsCollectionsLoading(false);
       }
-    }
+    };
 
-    getCollections()
+    getCollections();
   }, [
     collections.length,
     daoContract,
     isCollectionsLoading,
     setCollections,
     setIsCollectionsLoading,
-  ])
+  ]);
 }
