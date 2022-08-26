@@ -69,17 +69,20 @@ function VotingOverview() {
                   p={10}
                   bg={
                     winningProposalIndex?.toString() === index?.toString()
-                      ? "green.100"
-                      : ""
+                      ? "green.50"
+                      : "gray.50"
                   }
+                  boxShadow="dark-lg"
+                  rounded="md"
                 >
                   <Text>Index: {index?.toString()}</Text>
                   <Text>VoteCount: {voteCount?.toString()}</Text>
                   <Text>
-                    Vote %:{" "}
-                    {totalVotes?.toString() === "0"
+                    Vote:{" "}
+                    {totalVotes === 0
                       ? "0"
-                      : voteCount?.toNumber() / totalVotes?.toNumber()}
+                      : (voteCount?.toNumber() / totalVotes) * 100}
+                    %
                   </Text>
                   <Text>Collection Size: {collectionSize?.toString()}</Text>
                   <Text>Is active: {active?.toString()}</Text>
