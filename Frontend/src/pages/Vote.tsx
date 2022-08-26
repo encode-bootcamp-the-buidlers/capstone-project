@@ -2,22 +2,19 @@ import { Spinner } from "@chakra-ui/react"
 import { useContext, useEffect, useState } from "react"
 import { Gallery } from "../components/Gallery"
 import { ContentWrapper } from "../components/PageWrapper"
-import useLoadAllCollections from "../hooks/useLoadAllCollection"
+import useLoadAllCollections from "../hooks/useLoadAllCollections"
 import StateContext from "../state/stateContext"
 
 interface Props {}
 
 export function Vote(_props: Props) {
-  const { daoContract } = useContext(StateContext)
+  const { daoContract, collections, isCollectionsLoading } =
+    useContext(StateContext)
 
   //state variables
   const [proposals, setProposals] = useState<any[]>([])
   const [isProposalsLoading, setIsProposalsLoading] = useState(false)
   const [isProposalLoaded, setIsProposalLoaded] = useState(false)
-
-  const [collections, setCollections] = useState<any[]>([])
-  const [isCollectionsLoading, setIsCollectionsLoading] =
-    useState<boolean>(false)
 
   useEffect(() => {
     async function loadProposals() {
@@ -40,12 +37,7 @@ export function Vote(_props: Props) {
     loadProposals()
   }, [daoContract, isProposalsLoading, proposals.length])
 
-  useLoadAllCollections({
-    collections,
-    setCollections,
-    isCollectionsLoading,
-    setIsCollectionsLoading,
-  })
+  useLoadAllCollections({})
 
   return isCollectionsLoading ? (
     <Spinner />

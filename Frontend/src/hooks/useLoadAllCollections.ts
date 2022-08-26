@@ -1,25 +1,19 @@
 import axios from "axios"
-import React, { useContext } from "react"
+import { useContext, useEffect } from "react"
 import StateContext from "../state/stateContext"
 
-interface Props {
-  collections: any[]
-  setCollections: any
-  isCollectionsLoading: boolean
-  setIsCollectionsLoading: any
-}
+interface Props {}
 
-export default function useLoadAllCollections({
-  collections,
-  setCollections,
-  isCollectionsLoading,
-  setIsCollectionsLoading,
-}: Props) {
-  const { daoContract } = useContext(StateContext)
+export default function useLoadAllCollections(_props: Props) {
+  const {
+    daoContract,
+    collections,
+    setCollections,
+    isCollectionsLoading,
+    setIsCollectionsLoading,
+  } = useContext(StateContext)
 
-  React.useEffect(() => {
-    //connect to Ballot smart contract
-
+  useEffect(() => {
     //get collections
     const getCollections = async () => {
       if (!daoContract || collections.length > 0 || isCollectionsLoading) return

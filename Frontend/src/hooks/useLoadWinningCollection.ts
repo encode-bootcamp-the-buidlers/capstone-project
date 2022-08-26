@@ -2,45 +2,46 @@ import axios from "axios"
 import React, { useContext } from "react"
 import StateContext from "../state/stateContext"
 
-interface Props {
-  collection: any[]
-  setCollection: any
-  isCollectionsLoading: boolean
-  setIsCollectionsLoading: any
-  winningProposalIndex: any
-  setwinningProposalIndex: any
-}
+interface Props {}
 
-export default function useLoadWinningCollection({
-  collection,
-  setCollection,
-  isCollectionsLoading,
-  setIsCollectionsLoading,
-  winningProposalIndex,
-  setwinningProposalIndex,
-}: Props) {
-  const { daoContract } = useContext(StateContext)
+export default function useLoadWinningCollection(_props: Props) {
+  const {
+    daoContract,
+
+    isWinningCollectionsLoading,
+    setIsWinningCollectionsLoading,
+    winningProposalIndex,
+    setWinningProposalIndex,
+    winningCollection,
+    setWinningCollection,
+  } = useContext(StateContext)
 
   React.useEffect(() => {
     //connect to Ballot smart contract
 
     //get collections
     const getCollections = async () => {
-      if (!daoContract || collection || isCollectionsLoading) return
+      if (
+        !daoContract ||
+        winningCollection ||
+        !winningProposalIndex ||
+        isWinningCollectionsLoading
+      )
+        return
 
       //get CID of items of each collection
       //get current amount of votes for each collection
       //get issuer of each collection
       try {
-        setIsCollectionsLoading(true)
+        setIsWinningCollectionsLoading(true)
 
         const proposals = await daoContract.getAllProposals()
         const winningProposal = await daoContract.getWinningProposal()
 
-        setwinningProposalIndex(winningProposal)
+        setWinningProposalIndex(winningProposal)
         // TODO: for now, we only have one winning collection
 
-        const ipfsFolderCID = proposals[winningProposal].ipfsFolderCID
+        const ipfsFolderCID = proposals[winningProposalIndex].ipfsFolderCID
 
         const { data } = await axios.get(
           `https://dweb.link/api/v0/ls?arg=${ipfsFolderCID}`
@@ -49,22 +50,22 @@ export default function useLoadWinningCollection({
         const collection = data?.["Objects"]?.[0]?.["Links"] || []
         console.log("Winning collection", collection)
 
-        setCollection(collection)
+        setWinningCollection(winningCollection)
       } catch (error) {
         console.log(error)
       } finally {
-        setIsCollectionsLoading(false)
+        setIsWinningCollectionsLoading(false)
       }
     }
 
     getCollections()
   }, [
-    collection,
     daoContract,
-    isCollectionsLoading,
-    setCollection,
-    setIsCollectionsLoading,
-    setwinningProposalIndex,
+    isWinningCollectionsLoading,
+    setIsWinningCollectionsLoading,
+    setWinningCollection,
+    setWinningProposalIndex,
+    winningCollection,
     winningProposalIndex,
   ])
 }

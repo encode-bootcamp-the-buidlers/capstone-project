@@ -10,25 +10,20 @@ import StateContext from "../state/stateContext"
 interface Props {}
 
 export function MyCollections(props: Props) {
-  const { daoContract } = useContext(StateContext)
+  const {
+    daoContract,
+    winningProposalIndex,
+    setWinningCollection,
+    winningCollection,
+    isWinningCollectionsLoading,
+    setIsWinningCollectionsLoading,
+  } = useContext(StateContext)
 
   const { address } = useAccount()
 
-  const [collection, setCollection] = useState<any>()
-  const [isCollectionsLoading, setIsCollectionsLoading] =
-    useState<boolean>(false)
-
   const [percents, setPercents] = useState<number[]>([])
-  const [winningProposalIndex, setwinningProposalIndex] = useState<number>(0)
 
-  useLoadWinningCollection({
-    collection,
-    setCollection,
-    isCollectionsLoading,
-    setIsCollectionsLoading,
-    winningProposalIndex,
-    setwinningProposalIndex,
-  })
+  useLoadWinningCollection({})
 
   const [proposalVoters, setProposalVoters] = useState([])
   useLoadPercentages({ percents, setPercents })
@@ -57,7 +52,7 @@ export function MyCollections(props: Props) {
 
   return (
     <ContentWrapper>
-      {isCollectionsLoading ? (
+      {isWinningCollectionsLoading ? (
         <Flex justifyContent="center">
           <Spinner />
         </Flex>
@@ -66,11 +61,13 @@ export function MyCollections(props: Props) {
         <Text>You haven't voted for a winning collection yet. Good luck!</Text>
       ) : (
         <Gallery
-          images={collection
+          images={winningCollection
             .filter((item: any) => item.Name.endsWith("png"))
             .map((item: any) => "https://ipfs.io/ipfs/" + item.Hash)}
           artistName="Mr T."
-          percent={percents[winningProposalIndex]}
+          {...(winningProposalIndex
+            ? { percent: percents[winningProposalIndex] }
+            : {})}
         />
       )}
     </ContentWrapper>
