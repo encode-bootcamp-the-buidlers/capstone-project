@@ -85,7 +85,6 @@ function VotingOverview() {
                     %
                   </Text>
                   <Text>Collection Size: {collectionSize?.toString()}</Text>
-                  <Text>Is active: {active?.toString()}</Text>
                 </GridItem>
               )
             })}
