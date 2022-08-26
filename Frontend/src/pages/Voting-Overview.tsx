@@ -6,7 +6,7 @@ import useLoadWinningCollection from "../hooks/useLoadWinningCollection"
 import StateContext from "../state/stateContext"
 
 function VotingOverview() {
-  const { daoContract, proposals, isProposalsLoading, winningProposalIndex } =
+  const { proposals, isProposalsLoading, winningProposalIndex } =
     useContext(StateContext)
 
   useLoadProposals()
