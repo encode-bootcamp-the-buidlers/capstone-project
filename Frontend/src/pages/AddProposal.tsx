@@ -10,9 +10,11 @@ import {
   NumberInput,
   NumberInputField,
   NumberInputStepper,
+  Spinner,
 } from "@chakra-ui/react"
-import { useState } from "react"
+import { useContext, useState } from "react"
 import { ContentWrapper } from "../components/PageWrapper"
+import StateContext from "../state/stateContext"
 
 interface Props {}
 
@@ -26,13 +28,42 @@ export function AddProposal(_props: Props) {
     ipfsFolderCID: false,
   })
 
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+
+  const { daoContract } = useContext(StateContext)
+
+  async function onSubmit() {
+    if (!daoContract) return
+
+    if (!input.collectionSize) {
+      setIsError({ ...isError, collectionSize: true })
+      return
+    }
+    if (!input.ipfsFolderCID) {
+      setIsError({ ...isError, ipfsFolderCID: true })
+      return
+    }
+    setIsError({ collectionSize: false, ipfsFolderCID: false })
+
+    setIsSubmitting(true)
+    await daoContract.addProposal(
+      input.collectionSize,
+      `${input.ipfsFolderCID}/` // needed so that the contract doesn't have to add the '/'
+    )
+    setInput({
+      collectionSize: "",
+      ipfsFolderCID: "",
+    })
+    setIsSubmitting(false)
+  }
+
   return (
     <ContentWrapper>
       <Heading>Add Proposal</Heading>
 
       <FormControl mt={10}>
         <FormLabel>Collection Size</FormLabel>
-        {/* <Input type="number" min={0} step={1} /> */}
+
         <NumberInput
           min={0}
           step={1}
@@ -43,7 +74,7 @@ export function AddProposal(_props: Props) {
               collectionSize: value,
             })
           }
-          isInvalid={input.collectionSize}
+          isInvalid={isError.collectionSize}
         >
           <NumberInputField />
           <NumberInputStepper>
@@ -65,14 +96,20 @@ export function AddProposal(_props: Props) {
               ipfsFolderCID: e.target.value,
             })
           }
-          isInvalid={input.ipfsFolderCID}
+          isInvalid={isError.ipfsFolderCID}
         />
         <FormHelperText>
           Please label your collection 0.json, 1.json, ... inside the folder
         </FormHelperText>
       </FormControl>
 
-      <Button colorScheme="teal">Submit</Button>
+      <Button
+        colorScheme="teal"
+        isDisabled={isSubmitting}
+        onClick={() => onSubmit()}
+      >
+        {isSubmitting ? <Spinner /> : "Submit"}
+      </Button>
     </ContentWrapper>
   )
 }
