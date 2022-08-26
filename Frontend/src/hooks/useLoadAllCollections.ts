@@ -7,6 +7,9 @@ interface Props {}
 export default function useLoadAllCollections(_props: Props) {
   const {
     daoContract,
+
+    proposals,
+
     collections,
     setCollections,
     isCollectionsLoading,
@@ -16,7 +19,13 @@ export default function useLoadAllCollections(_props: Props) {
   useEffect(() => {
     //get collections
     const getCollections = async () => {
-      if (!daoContract || collections.length > 0 || isCollectionsLoading) return
+      if (
+        !daoContract ||
+        proposals.length === 0 ||
+        collections.length > 0 ||
+        isCollectionsLoading
+      )
+        return
 
       //get CID of items of each collection
       //get current amount of votes for each collection
@@ -25,7 +34,6 @@ export default function useLoadAllCollections(_props: Props) {
         setIsCollectionsLoading(true)
 
         const collections = []
-        const proposals = await daoContract.getAllProposals()
 
         for (const proposal of proposals) {
           const ipfsFolderCID = proposal.ipfsFolderCID
@@ -51,6 +59,7 @@ export default function useLoadAllCollections(_props: Props) {
   }, [
     collections.length,
     daoContract,
+    proposals,
     isCollectionsLoading,
     setCollections,
     setIsCollectionsLoading,

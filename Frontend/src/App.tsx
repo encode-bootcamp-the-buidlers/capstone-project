@@ -14,6 +14,10 @@ import StateContext from "./state/stateContext"
 function App() {
   const [daoContract, setDaoContract] = useState<null | ethers.Contract>(null)
   // new ethers.Contract(ethers.constants.AddressZero, []) //necessary init due to TS
+
+  const [proposals, setProposals] = useState<any[]>([])
+  const [isProposalsLoading, setIsProposalsLoading] = useState<boolean>(false)
+
   const [collections, setCollections] = useState<any[]>([])
   const [isCollectionsLoading, setIsCollectionsLoading] =
     useState<boolean>(false)
@@ -33,12 +37,20 @@ function App() {
         value={{
           daoContract,
           setDaoContract,
+
+          proposals,
+          setProposals,
+          isProposalsLoading,
+          setIsProposalsLoading,
+
           collections,
           setCollections,
           isCollectionsLoading,
           setIsCollectionsLoading,
+
           winningProposalIndex,
           setWinningProposalIndex,
+
           winningCollection,
           setWinningCollection,
           isWinningCollectionsLoading,

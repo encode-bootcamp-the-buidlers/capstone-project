@@ -4,6 +4,7 @@ import { useAccount } from "wagmi"
 import { Gallery } from "../components/Gallery"
 import { ContentWrapper } from "../components/PageWrapper"
 import useLoadPercentages from "../hooks/useLoadPercentages"
+import useLoadProposals from "../hooks/useLoadProposals"
 import useLoadWinningCollection from "../hooks/useLoadWinningCollection"
 import StateContext from "../state/stateContext"
 
@@ -23,6 +24,7 @@ export function MyCollections(props: Props) {
 
   const [percents, setPercents] = useState<number[]>([])
 
+  useLoadProposals()
   useLoadWinningCollection({})
 
   const [proposalVoters, setProposalVoters] = useState([])

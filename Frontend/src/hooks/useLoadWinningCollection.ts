@@ -8,8 +8,11 @@ export default function useLoadWinningCollection(_props: Props) {
   const {
     daoContract,
 
+    proposals,
+
     isWinningCollectionsLoading,
     setIsWinningCollectionsLoading,
+
     winningProposalIndex,
     setWinningProposalIndex,
     winningCollection,
@@ -23,6 +26,7 @@ export default function useLoadWinningCollection(_props: Props) {
     const getCollections = async () => {
       if (
         !daoContract ||
+        proposals.length === 0 ||
         winningCollection ||
         !winningProposalIndex ||
         isWinningCollectionsLoading
@@ -35,7 +39,6 @@ export default function useLoadWinningCollection(_props: Props) {
       try {
         setIsWinningCollectionsLoading(true)
 
-        const proposals = await daoContract.getAllProposals()
         const winningProposal = await daoContract.getWinningProposal()
 
         setWinningProposalIndex(winningProposal)
@@ -61,6 +64,7 @@ export default function useLoadWinningCollection(_props: Props) {
     getCollections()
   }, [
     daoContract,
+    proposals,
     isWinningCollectionsLoading,
     setIsWinningCollectionsLoading,
     setWinningCollection,

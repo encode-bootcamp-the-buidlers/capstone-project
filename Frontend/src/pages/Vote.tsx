@@ -1,8 +1,9 @@
 import { Spinner } from "@chakra-ui/react"
-import { useContext, useEffect, useState } from "react"
+import { useContext } from "react"
 import { Gallery } from "../components/Gallery"
 import { ContentWrapper } from "../components/PageWrapper"
 import useLoadAllCollections from "../hooks/useLoadAllCollections"
+import useLoadProposals from "../hooks/useLoadProposals"
 import StateContext from "../state/stateContext"
 
 interface Props {}
@@ -11,37 +12,12 @@ export function Vote(_props: Props) {
   const { daoContract, collections, isCollectionsLoading } =
     useContext(StateContext)
 
-  //state variables
-  const [proposals, setProposals] = useState<any[]>([])
-  const [isProposalsLoading, setIsProposalsLoading] = useState(false)
-  const [isProposalLoaded, setIsProposalLoaded] = useState(false)
-
-  useEffect(() => {
-    async function loadProposals() {
-      if (!daoContract || proposals.length > 0 || isProposalsLoading) return
-      try {
-        setIsProposalsLoading(true)
-
-        const proposals = await daoContract.getAllProposals()
-        console.log("proposals", proposals)
-
-        setProposals(proposals)
-        setIsProposalLoaded(true)
-      } catch (e: any) {
-        console.error(e.message)
-      } finally {
-        setIsProposalsLoading(false)
-      }
-    }
-
-    loadProposals()
-  }, [daoContract, isProposalsLoading, proposals.length])
-
+  useLoadProposals()
   useLoadAllCollections({})
 
   return isCollectionsLoading ? (
     <Spinner />
-  ) : isProposalLoaded && collections.length > 0 ? (
+  ) : collections.length > 0 ? (
     <ContentWrapper>
       {collections.map((collection, idx) => (
         <Gallery
