@@ -1,15 +1,6 @@
-import {
-  Box,
-  Flex,
-  Grid,
-  GridItem,
-  Heading,
-  Spinner,
-  Text,
-} from "@chakra-ui/react"
+import { Flex, Grid, GridItem, Heading, Spinner, Text } from "@chakra-ui/react"
 import { useContext } from "react"
 import { ContentWrapper } from "../components/PageWrapper"
-import useLoadAllCollections from "../hooks/useLoadAllCollections"
 import useLoadProposals from "../hooks/useLoadProposals"
 import useLoadWinningCollection from "../hooks/useLoadWinningCollection"
 import StateContext from "../state/stateContext"
@@ -20,7 +11,6 @@ function VotingOverview() {
 
   useLoadProposals()
   useLoadWinningCollection({})
-  // useLoadAllCollections({})
 
   // TODO: This component is here to show some basic metrics for the current ballot
   // like proposal count, proposal owners
