@@ -105,8 +105,10 @@ export function AddProposal(_props: Props) {
 
       <Button
         colorScheme="teal"
-        isDisabled={isSubmitting}
+        // remove '|| true' after backend implementation is set
+        isDisabled={isSubmitting || true}
         onClick={() => onSubmit()}
+        w="fit-content"
       >
         {isSubmitting ? <Spinner /> : "Submit"}
       </Button>
