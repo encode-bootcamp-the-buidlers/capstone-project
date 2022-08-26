@@ -29,67 +29,59 @@ function VotingOverview() {
     <Spinner />
   ) : proposals.length > 0 ? (
     <ContentWrapper>
-      <Flex flexDir="column">
-        <Heading as="h2">Voting Overview</Heading>
+      <Heading>Voting Overview</Heading>
 
-        <Flex mt={10}>
-          <Text>Voting active? </Text>
-          <Text ml={5}>
-            {proposals.some((proposal) => !proposal.active)
-              ? "Finished"
-              : "Ongoing"}
-          </Text>
-        </Flex>
+      <Flex>
+        <Text>Voting active? </Text>
+        <Text ml={5}>
+          {proposals.some((proposal) => !proposal.active)
+            ? "Finished"
+            : "Ongoing"}
+        </Text>
+      </Flex>
 
-        <Text mt={5}>Total Votes: {totalVotes}</Text>
+      <Text>Total Votes: {totalVotes}</Text>
 
-        <Flex
-          mt={10}
-          alignItems="center"
+      <Flex mt={5} alignItems="center" justifyContent="center" w="full" mb={4}>
+        <Grid
+          templateRows="repeat(2, 1fr)"
+          templateColumns="repeat(2, 1fr)"
+          gap={4}
+          height="fit-content"
           justifyContent="center"
-          w="full"
-          mb={4}
         >
-          <Grid
-            templateRows="repeat(2, 1fr)"
-            templateColumns="repeat(2, 1fr)"
-            gap={4}
-            height="fit-content"
-            justifyContent="center"
-          >
-            {proposals.map((proposal, idx) => {
-              const { index, voteCount, collectionSize, active } = proposal
+          {proposals.map((proposal, idx) => {
+            const { index, voteCount, collectionSize } = proposal
 
-              return (
-                <GridItem
-                  key={`proposal-${idx}`}
-                  flexDirection="column"
-                  border="2px"
-                  borderRadius="10px"
-                  p={10}
-                  bg={
-                    winningProposalIndex?.toString() === index?.toString()
-                      ? "green.50"
-                      : "gray.50"
-                  }
-                  boxShadow="dark-lg"
-                  rounded="md"
-                >
-                  <Text>Index: {index?.toString()}</Text>
-                  <Text>VoteCount: {voteCount?.toString()}</Text>
-                  <Text>
-                    Vote:{" "}
-                    {totalVotes === 0
-                      ? "0"
-                      : (voteCount?.toNumber() / totalVotes) * 100}
-                    %
-                  </Text>
-                  <Text>Collection Size: {collectionSize?.toString()}</Text>
-                </GridItem>
-              )
-            })}
-          </Grid>
-        </Flex>
+            return (
+              <GridItem
+                key={`proposal-${idx}`}
+                flexDirection="column"
+                border="2px"
+                borderRadius="10px"
+                p={10}
+                bg={
+                  winningProposalIndex?.toString() === index?.toString()
+                    ? "green.50"
+                    : "gray.50"
+                }
+                boxShadow="dark-lg"
+                rounded="md"
+              >
+                <Text>Index: {index?.toString()}</Text>
+                <Text>VoteCount: {voteCount?.toString()}</Text>
+                <Text>
+                  Vote:{" "}
+                  {totalVotes === 0
+                    ? "0"
+                    : (voteCount?.toNumber() / totalVotes) * 100}
+                  %
+                </Text>
+                <Text>Collection Size: {collectionSize?.toString()}</Text>
+              </GridItem>
+            )
+          })}
+        </Grid>
       </Flex>
     </ContentWrapper>
   ) : (

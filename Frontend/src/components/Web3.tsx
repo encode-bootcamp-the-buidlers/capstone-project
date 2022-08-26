@@ -37,13 +37,15 @@ export default function Web3({ children }: { children: React.ReactNode }) {
 
 function getChainsProviders(isLocalNetwork: boolean) {
   let chainArray = [...defaultChains, chain.polygon, chain.polygonMumbai]
-  let providerArray = [
-    alchemyProvider({
-      apiKey: process.env.REACT_APP_ALCHEMY_ID!,
-    }),
+  let providerArray = [publicProvider()]
 
-    publicProvider(),
-  ]
+  if (process.env.REACT_APP_ALCHEMY_ID) {
+    providerArray.unshift(
+      alchemyProvider({
+        apiKey: process.env.REACT_APP_ALCHEMY_ID,
+      })
+    )
+  }
 
   if (isLocalNetwork) {
     console.log("Connecting to local JSON-RPC provider")

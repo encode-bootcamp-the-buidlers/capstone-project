@@ -1,4 +1,4 @@
-import { Spinner } from "@chakra-ui/react"
+import { Box, Flex, Heading, Spinner } from "@chakra-ui/react"
 import { useContext } from "react"
 import { Gallery } from "../components/Gallery"
 import { ContentWrapper } from "../components/PageWrapper"
@@ -19,17 +19,21 @@ export function Vote(_props: Props) {
     <Spinner />
   ) : collections.length > 0 ? (
     <ContentWrapper>
-      {collections.map((collection, idx) => (
-        <Gallery
-          key={idx}
-          images={collection
-            .filter((item: any) => item.Name.endsWith("png"))
-            .map((item: any) => "https://ipfs.io/ipfs/" + item.Hash)}
-          artistName={"collection nr. " + idx}
-          daoContract={daoContract}
-          proposalIndex={idx}
-        />
-      ))}
+      <Heading>Vote for a Proposal</Heading>
+
+      <Box mt={10}>
+        {collections.map((collection, idx) => (
+          <Gallery
+            key={idx}
+            images={collection
+              .filter((item: any) => item.Name.endsWith("png"))
+              .map((item: any) => "https://ipfs.io/ipfs/" + item.Hash)}
+            artistName={"collection nr. " + idx}
+            daoContract={daoContract}
+            proposalIndex={idx}
+          />
+        ))}
+      </Box>
     </ContentWrapper>
   ) : (
     <div>No proposals</div>
