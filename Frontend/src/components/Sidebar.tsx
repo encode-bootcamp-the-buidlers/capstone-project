@@ -30,6 +30,15 @@ export default function Sidebar({ children }: Props) {
           </Flex>
         </Link>
 
+        <Link to="/add-proposal">
+          <Flex alignItems="center" gap={4}>
+            <Box w={6}>
+              <Image src={vote} alt="logo" />
+            </Box>
+            Add Proposal
+          </Flex>
+        </Link>
+
         <Link to="/my-collections">
           <Flex alignItems="center" gap={4}>
             <Box w={6}>

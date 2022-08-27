@@ -1,4 +1,4 @@
-import { Flex, Spinner, Text } from "@chakra-ui/react"
+import { Flex, Heading, Spinner, Text } from "@chakra-ui/react"
 import { useContext, useEffect, useState } from "react"
 import { useAccount } from "wagmi"
 import { Gallery } from "../components/Gallery"
@@ -14,10 +14,8 @@ export function MyCollections(props: Props) {
   const {
     daoContract,
     winningProposalIndex,
-    setWinningCollection,
     winningCollection,
     isWinningCollectionsLoading,
-    setIsWinningCollectionsLoading,
   } = useContext(StateContext)
 
   const { address } = useAccount()
@@ -54,6 +52,8 @@ export function MyCollections(props: Props) {
 
   return (
     <ContentWrapper>
+      <Heading>Winning collections you've received an airdrop</Heading>
+
       {isWinningCollectionsLoading ? (
         <Flex justifyContent="center">
           <Spinner />
