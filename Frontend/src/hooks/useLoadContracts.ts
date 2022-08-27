@@ -15,7 +15,7 @@ export default function useLoadContracts() {
       if (
         chain?.id &&
         // @ts-ignore
-        !chain.id.toString() === process.env.DEPLOYED_CHAIN_ID!
+        chain.id.toString() !== process.env.REACT_APP_DEPLOYED_CHAIN_ID!
       ) {
         alert(
           "DAO got talent is in development! Please connect to rinkeby test network to access website."
@@ -24,6 +24,11 @@ export default function useLoadContracts() {
       }
 
       if (!signer || !chain?.id) return
+
+      if (!Object.keys(DaoContract).includes(chain.id.toString())) {
+        alert(`No deployment found for Chain ${chain.name} // ${chain.id}.`)
+        return
+      }
 
       const daoContract = new ethers.Contract(
         (DaoContract as any)[chain.id.toString()].address,
@@ -39,5 +44,5 @@ export default function useLoadContracts() {
     }
 
     connectToContracts()
-  }, [chain?.id, setDaoContract, signer])
+  }, [chain?.id, chain?.name, setDaoContract, signer])
 }

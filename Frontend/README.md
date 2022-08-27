@@ -2,6 +2,10 @@
 
 `cp .env.example .env` - Add env variables
 
+The env var `REACT_APP_DEPLOYED_CHAIN_ID` is `1337` when using
+`yarn run node --network hardhat`
+on the testnet it's `4`.
+
 ---
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

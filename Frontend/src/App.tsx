@@ -15,12 +15,46 @@ function App() {
   const [daoContract, setDaoContract] = useState<null | ethers.Contract>(null)
   // new ethers.Contract(ethers.constants.AddressZero, []) //necessary init due to TS
 
+  const [proposals, setProposals] = useState<any[]>([])
+  const [isProposalsLoading, setIsProposalsLoading] = useState<boolean>(false)
+
+  const [collections, setCollections] = useState<any[]>([])
+  const [isCollectionsLoading, setIsCollectionsLoading] =
+    useState<boolean>(false)
+
+  const [winningProposalIndex, setWinningProposalIndex] = useState<
+    number | null
+  >(null)
+
+  const [winningCollection, setWinningCollection] = useState<any>({})
+  useState<boolean>(false)
+  const [isWinningCollectionsLoading, setIsWinningCollectionsLoading] =
+    useState<boolean>(false)
+
   return (
     <BrowserRouter>
       <StateContext.Provider
         value={{
           daoContract,
           setDaoContract,
+
+          proposals,
+          setProposals,
+          isProposalsLoading,
+          setIsProposalsLoading,
+
+          collections,
+          setCollections,
+          isCollectionsLoading,
+          setIsCollectionsLoading,
+
+          winningProposalIndex,
+          setWinningProposalIndex,
+
+          winningCollection,
+          setWinningCollection,
+          isWinningCollectionsLoading,
+          setIsWinningCollectionsLoading,
         }}
       >
         <VStack h="full">
@@ -30,7 +64,7 @@ function App() {
             <Flex w="full" h="full" justifyContent="center">
               <Routes>
                 <Route path="/" element={<Home />} />
-                {/* <Route path="/voting-overview" element={<VotingOverview />} /> */}
+                <Route path="/voting-overview" element={<VotingOverview />} />
                 <Route path="/vote" element={<Vote />} />
                 <Route path="/my-collections" element={<MyCollections />} />
               </Routes>

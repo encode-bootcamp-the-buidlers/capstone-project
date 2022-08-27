@@ -1,28 +1,31 @@
 import axios from "axios"
-import React, { useContext } from "react"
+import { useContext, useEffect } from "react"
 import StateContext from "../state/stateContext"
 
-interface Props {
-  collections: any[]
-  setCollections: any
-  isCollectionsLoading: boolean
-  setIsCollectionsLoading: any
-}
+interface Props {}
 
-export default function useLoadAllCollections({
-  collections,
-  setCollections,
-  isCollectionsLoading,
-  setIsCollectionsLoading,
-}: Props) {
-  const { daoContract } = useContext(StateContext)
+export default function useLoadAllCollections(_props: Props) {
+  const {
+    daoContract,
 
-  React.useEffect(() => {
-    //connect to Ballot smart contract
+    proposals,
 
+    collections,
+    setCollections,
+    isCollectionsLoading,
+    setIsCollectionsLoading,
+  } = useContext(StateContext)
+
+  useEffect(() => {
     //get collections
     const getCollections = async () => {
-      if (!daoContract || collections.length > 0 || isCollectionsLoading) return
+      if (
+        !daoContract ||
+        proposals.length === 0 ||
+        collections.length > 0 ||
+        isCollectionsLoading
+      )
+        return
 
       //get CID of items of each collection
       //get current amount of votes for each collection
@@ -31,7 +34,6 @@ export default function useLoadAllCollections({
         setIsCollectionsLoading(true)
 
         const collections = []
-        const proposals = await daoContract.getAllProposals()
 
         for (const proposal of proposals) {
           const ipfsFolderCID = proposal.ipfsFolderCID
@@ -57,6 +59,7 @@ export default function useLoadAllCollections({
   }, [
     collections.length,
     daoContract,
+    proposals,
     isCollectionsLoading,
     setCollections,
     setIsCollectionsLoading,

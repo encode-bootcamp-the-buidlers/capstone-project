@@ -12,14 +12,14 @@ export default function Sidebar({ children }: Props) {
   return (
     <Flex w="full" h="calc(100% - 60px)" px={8} pt={8}>
       <Flex w={60} h="full" flexDir="column" gap={6}>
-        {/* <Link to="/voting-overview">
+        <Link to="/voting-overview">
           <Flex alignItems="center" gap={4}>
             <Box w={6}>
               <Image src={vote} alt="logo" />
             </Box>
             Voting Overview
           </Flex>
-        </Link> */}
+        </Link>
 
         <Link to="/vote">
           <Flex alignItems="center" gap={4}>

@@ -39,7 +39,7 @@ function getChainsProviders(isLocalNetwork: boolean) {
   let chainArray = [...defaultChains, chain.polygon, chain.polygonMumbai]
   let providerArray = [
     alchemyProvider({
-      apiKey: process.env.ALCHEMY_ID!,
+      apiKey: process.env.REACT_APP_ALCHEMY_ID!,
     }),
 
     publicProvider(),
