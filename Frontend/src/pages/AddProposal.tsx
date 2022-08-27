@@ -11,6 +11,7 @@ import {
   NumberInputField,
   NumberInputStepper,
   Spinner,
+  Box,
 } from "@chakra-ui/react"
 import { useContext, useState } from "react"
 import { useSigner } from "wagmi"
@@ -62,58 +63,64 @@ export function AddProposal(_props: Props) {
 
   return signer ? (
     <ContentWrapper>
-      <Heading>Add Proposal</Heading>
+      <Box display="flex" flexDirection="column" alignItems="center">
+        <Heading>Add Proposal</Heading>
 
-      <FormControl mt={10}>
-        <FormLabel>Collection Size</FormLabel>
+        <FormControl mt={10}>
+          <FormLabel>Collection Size</FormLabel>
 
-        <NumberInput
-          min={0}
-          step={1}
-          value={input.collectionSize}
-          onChange={(value) =>
-            setInput({
-              ...input,
-              collectionSize: value,
-            })
-          }
-          isInvalid={isError.collectionSize}
+          <NumberInput
+            min={0}
+            step={1}
+            value={input.collectionSize}
+            onChange={(value) =>
+              setInput({
+                ...input,
+                collectionSize: value,
+              })
+            }
+            isInvalid={isError.collectionSize}
+          >
+            <NumberInputField />
+            <NumberInputStepper>
+              <NumberIncrementStepper />
+              <NumberDecrementStepper />
+            </NumberInputStepper>
+          </NumberInput>
+          <FormHelperText>
+            How many items does your collection have?
+          </FormHelperText>
+
+          <FormLabel mt={5}>IPFS Folder CID</FormLabel>
+          <Input
+            type="text"
+            value={input.ipfsFolderCID}
+            onChange={(e) =>
+              setInput({
+                ...input,
+                ipfsFolderCID: e.target.value,
+              })
+            }
+            isInvalid={isError.ipfsFolderCID}
+          />
+          <FormHelperText>
+            Please label your collection 0.json, 1.json, ... inside the folder
+          </FormHelperText>
+        </FormControl>
+
+        <Button
+          colorScheme="teal"
+          isDisabled={isSubmitting}
+          onClick={() => onSubmit()}
+          w="fit-content"
+          marginTop="30px"
+          px="30px"
+          py="10px"
+          borderRadius="md"
         >
-          <NumberInputField />
-          <NumberInputStepper>
-            <NumberIncrementStepper />
-            <NumberDecrementStepper />
-          </NumberInputStepper>
-        </NumberInput>
-        <FormHelperText>
-          How many items does your collection have?
-        </FormHelperText>
-
-        <FormLabel mt={5}>IPFS Folder CID</FormLabel>
-        <Input
-          type="text"
-          value={input.ipfsFolderCID}
-          onChange={(e) =>
-            setInput({
-              ...input,
-              ipfsFolderCID: e.target.value,
-            })
-          }
-          isInvalid={isError.ipfsFolderCID}
-        />
-        <FormHelperText>
-          Please label your collection 0.json, 1.json, ... inside the folder
-        </FormHelperText>
-      </FormControl>
-
-      <Button
-        colorScheme="teal"
-        isDisabled={isSubmitting}
-        onClick={() => onSubmit()}
-        w="fit-content"
-      >
-        {isSubmitting ? <Spinner /> : "Submit"}
-      </Button>
+          {isSubmitting ? <Spinner /> : "Submit"}
+        </Button>
+      </Box>
     </ContentWrapper>
   ) : (
     <div>Log in with your wallet</div>
