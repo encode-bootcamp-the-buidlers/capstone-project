@@ -13,6 +13,7 @@ import {
   Spinner,
 } from "@chakra-ui/react"
 import { useContext, useState } from "react"
+import { useSigner } from "wagmi"
 import { ContentWrapper } from "../components/PageWrapper"
 import StateContext from "../state/stateContext"
 
@@ -31,6 +32,8 @@ export function AddProposal(_props: Props) {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
   const { daoContract } = useContext(StateContext)
+
+  const { data: signer } = useSigner()
 
   async function onSubmit() {
     if (!daoContract) return
@@ -57,7 +60,7 @@ export function AddProposal(_props: Props) {
     setIsSubmitting(false)
   }
 
-  return (
+  return signer ? (
     <ContentWrapper>
       <Heading>Add Proposal</Heading>
 
@@ -105,13 +108,14 @@ export function AddProposal(_props: Props) {
 
       <Button
         colorScheme="teal"
-        // remove '|| true' after backend implementation is set
-        isDisabled={isSubmitting || true}
+        isDisabled={isSubmitting}
         onClick={() => onSubmit()}
         w="fit-content"
       >
         {isSubmitting ? <Spinner /> : "Submit"}
       </Button>
     </ContentWrapper>
+  ) : (
+    <div>Log in with your wallet</div>
   )
 }
