@@ -34,9 +34,9 @@ const deployBallot: DeployFunction = async function (hre: HardhatRuntimeEnvironm
   log(`Ballot at ${Ballot.address}`)
 
   // set Ballot as the admin of the governance token contract
-  governanceTokenContract.setRoles(deployer, Ballot.address)
+  await governanceTokenContract.setRoles(deployer, Ballot.address)
   // mint governance tokens for the chaiperson
-  governanceTokenContract.mint(deployer, BigNumber.from(1000).mul(BigNumber.from(10).pow(18)))
+  await governanceTokenContract.mint(deployer, BigNumber.from(1000).mul(BigNumber.from(10).pow(18)))
 
   if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
     await verify(Ballot.address, args)
