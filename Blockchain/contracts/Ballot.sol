@@ -62,7 +62,7 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     string winningProposalIPFSFolderCID
   );
 
-  address private keeperRegistryAddress;
+  address public keeperRegistryAddress;
 
   modifier onlyKeeperRegistry() {
     if (msg.sender != keeperRegistryAddress) {
@@ -213,7 +213,6 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
   {
     require(_keeperRegistryAddress != address(0));
     keeperRegistryAddress = _keeperRegistryAddress;
-    _grantRole(MINTER_ROLE, keeperRegistryAddress);
   }
 
   function getTotalVotes() public view returns (uint256) {
