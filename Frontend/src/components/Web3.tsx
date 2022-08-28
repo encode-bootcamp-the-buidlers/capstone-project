@@ -13,7 +13,7 @@ import { jsonRpcProvider } from "wagmi/providers/jsonRpc"
 import { publicProvider } from "wagmi/providers/public"
 // import { JsonRpcProvider } from "@ethersproject/providers"
 
-const isLocalNetwork = process.env.DEPLOYED_CHAIN_ID === "1337"
+const isLocalNetwork = process.env.REACT_APP_DEPLOYED_CHAIN_ID === "1337"
 
 const { chainArray, providerArray } = getChainsProviders(isLocalNetwork)
 
