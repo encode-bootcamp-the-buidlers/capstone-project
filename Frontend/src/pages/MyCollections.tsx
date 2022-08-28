@@ -64,6 +64,10 @@ export function MyCollections(props: Props) {
           <Text>
             You haven't voted for a winning collection yet. Good luck!
           </Text>
+        ) : !winningCollection ? (
+          <Text>
+            Voting is still ongoing. No winning proposal established yet.
+          </Text>
         ) : (
           <Gallery
             images={winningCollection
