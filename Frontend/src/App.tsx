@@ -27,7 +27,7 @@ function App() {
     number | null
   >(null)
 
-  const [winningCollection, setWinningCollection] = useState<any>({})
+  const [winningCollection, setWinningCollection] = useState<any>(null)
   useState<boolean>(false)
   const [isWinningCollectionsLoading, setIsWinningCollectionsLoading] =
     useState<boolean>(false)
