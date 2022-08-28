@@ -1,6 +1,6 @@
 {
   "1337": {
-    "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+    "address": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
     "abi": [
       {
         "inputs": [
@@ -249,6 +249,24 @@
           }
         ],
         "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "collectionSize",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "ipfsFolderCID",
+            "type": "string"
+          }
+        ],
+        "name": "addProposal",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
       },
       {
