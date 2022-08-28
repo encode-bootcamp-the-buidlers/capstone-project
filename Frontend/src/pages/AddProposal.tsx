@@ -11,8 +11,10 @@ import {
   NumberInputField,
   NumberInputStepper,
   Spinner,
+  Text,
 } from "@chakra-ui/react"
 import { useContext, useState } from "react"
+import { useAccount } from "wagmi"
 import { ContentWrapper } from "../components/PageWrapper"
 import StateContext from "../state/stateContext"
 
@@ -31,6 +33,8 @@ export function AddProposal(_props: Props) {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
   const { daoContract } = useContext(StateContext)
+
+  const { isConnected } = useAccount()
 
   async function onSubmit() {
     if (!daoContract) return
@@ -61,57 +65,65 @@ export function AddProposal(_props: Props) {
     <ContentWrapper>
       <Heading>Add Proposal</Heading>
 
-      <FormControl mt={10}>
-        <FormLabel>Collection Size</FormLabel>
+      {isConnected ? (
+        <>
+          {" "}
+          <FormControl mt={10}>
+            <FormLabel>Collection Size</FormLabel>
 
-        <NumberInput
-          min={0}
-          step={1}
-          value={input.collectionSize}
-          onChange={(value) =>
-            setInput({
-              ...input,
-              collectionSize: value,
-            })
-          }
-          isInvalid={isError.collectionSize}
-        >
-          <NumberInputField />
-          <NumberInputStepper>
-            <NumberIncrementStepper />
-            <NumberDecrementStepper />
-          </NumberInputStepper>
-        </NumberInput>
-        <FormHelperText>
-          How many items does your collection have?
-        </FormHelperText>
+            <NumberInput
+              min={0}
+              step={1}
+              value={input.collectionSize}
+              onChange={(value) =>
+                setInput({
+                  ...input,
+                  collectionSize: value,
+                })
+              }
+              isInvalid={isError.collectionSize}
+            >
+              <NumberInputField />
+              <NumberInputStepper>
+                <NumberIncrementStepper />
+                <NumberDecrementStepper />
+              </NumberInputStepper>
+            </NumberInput>
+            <FormHelperText>
+              How many items does your collection have?
+            </FormHelperText>
 
-        <FormLabel mt={5}>IPFS Folder CID</FormLabel>
-        <Input
-          type="text"
-          value={input.ipfsFolderCID}
-          onChange={(e) =>
-            setInput({
-              ...input,
-              ipfsFolderCID: e.target.value,
-            })
-          }
-          isInvalid={isError.ipfsFolderCID}
-        />
-        <FormHelperText>
-          Please label your collection 0.json, 1.json, ... inside the folder
-        </FormHelperText>
-      </FormControl>
-
-      <Button
-        colorScheme="teal"
-        // remove '|| true' after backend implementation is set
-        isDisabled={isSubmitting || true}
-        onClick={() => onSubmit()}
-        w="fit-content"
-      >
-        {isSubmitting ? <Spinner /> : "Submit"}
-      </Button>
+            <FormLabel mt={5}>IPFS Folder CID</FormLabel>
+            <Input
+              type="text"
+              value={input.ipfsFolderCID}
+              onChange={(e) =>
+                setInput({
+                  ...input,
+                  ipfsFolderCID: e.target.value,
+                })
+              }
+              isInvalid={isError.ipfsFolderCID}
+            />
+            <FormHelperText>
+              Please label your collection 0.json, 1.json, ... inside the folder
+            </FormHelperText>
+          </FormControl>
+          <Button
+            colorScheme="teal"
+            // remove '|| true' after backend implementation is set
+            isDisabled={isSubmitting || true}
+            onClick={() => onSubmit()}
+            w="fit-content"
+          >
+            {isSubmitting ? <Spinner /> : "Submit"}
+          </Button>
+        </>
+      ) : (
+        <Text>
+          Please connect to your wallet to interact with the dashboard.
+        </Text>
+      )}
     </ContentWrapper>
   )
 }

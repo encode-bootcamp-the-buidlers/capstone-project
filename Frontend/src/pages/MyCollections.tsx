@@ -18,7 +18,7 @@ export function MyCollections(props: Props) {
     isWinningCollectionsLoading,
   } = useContext(StateContext)
 
-  const { address } = useAccount()
+  const { address, isConnected } = useAccount()
 
   const [percents, setPercents] = useState<number[]>([])
 
@@ -54,23 +54,31 @@ export function MyCollections(props: Props) {
     <ContentWrapper>
       <Heading>Winning collections you've received an airdrop</Heading>
 
-      {isWinningCollectionsLoading ? (
-        <Flex justifyContent="center">
-          <Spinner />
-        </Flex>
-      ) : // @ts-ignore
-      !proposalVoters.includes(address) ? (
-        <Text>You haven't voted for a winning collection yet. Good luck!</Text>
+      {isConnected ? (
+        isWinningCollectionsLoading ? (
+          <Flex justifyContent="center">
+            <Spinner />
+          </Flex>
+        ) : // @ts-ignore
+        !proposalVoters.includes(address) ? (
+          <Text>
+            You haven't voted for a winning collection yet. Good luck!
+          </Text>
+        ) : (
+          <Gallery
+            images={winningCollection
+              .filter((item: any) => item.Name.endsWith("png"))
+              .map((item: any) => "https://ipfs.io/ipfs/" + item.Hash)}
+            artistName="Mr T."
+            {...(winningProposalIndex
+              ? { percent: percents[winningProposalIndex] }
+              : {})}
+          />
+        )
       ) : (
-        <Gallery
-          images={winningCollection
-            .filter((item: any) => item.Name.endsWith("png"))
-            .map((item: any) => "https://ipfs.io/ipfs/" + item.Hash)}
-          artistName="Mr T."
-          {...(winningProposalIndex
-            ? { percent: percents[winningProposalIndex] }
-            : {})}
-        />
+        <Text>
+          Please connect to your wallet to interact with the dashboard.
+        </Text>
       )}
     </ContentWrapper>
   )

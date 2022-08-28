@@ -1,5 +1,6 @@
-import { Box, Flex, Heading, Spinner } from "@chakra-ui/react"
+import { Box, Heading, Spinner, Text } from "@chakra-ui/react"
 import { useContext } from "react"
+import { useAccount } from "wagmi"
 import { Gallery } from "../components/Gallery"
 import { ContentWrapper } from "../components/PageWrapper"
 import useLoadAllCollections from "../hooks/useLoadAllCollections"
@@ -15,27 +16,37 @@ export function Vote(_props: Props) {
   useLoadProposals()
   useLoadAllCollections({})
 
+  const { isConnected } = useAccount()
+
   return isCollectionsLoading ? (
     <Spinner />
-  ) : collections.length > 0 ? (
+  ) : (
     <ContentWrapper>
       <Heading>Vote for a Proposal</Heading>
 
-      <Box mt={10}>
-        {collections.map((collection, idx) => (
-          <Gallery
-            key={idx}
-            images={collection
-              .filter((item: any) => item.Name.endsWith("png"))
-              .map((item: any) => "https://ipfs.io/ipfs/" + item.Hash)}
-            artistName={"collection nr. " + idx}
-            daoContract={daoContract}
-            proposalIndex={idx}
-          />
-        ))}
-      </Box>
+      {isConnected ? (
+        collections.length > 0 ? (
+          <Box mt={10}>
+            {collections.map((collection, idx) => (
+              <Gallery
+                key={idx}
+                images={collection
+                  .filter((item: any) => item.Name.endsWith("png"))
+                  .map((item: any) => "https://ipfs.io/ipfs/" + item.Hash)}
+                artistName={"collection nr. " + idx}
+                daoContract={daoContract}
+                proposalIndex={idx}
+              />
+            ))}
+          </Box>
+        ) : (
+          <Text>No proposals</Text>
+        )
+      ) : (
+        <Text>
+          Please connect to your wallet to interact with the dashboard.
+        </Text>
+      )}
     </ContentWrapper>
-  ) : (
-    <div>No proposals</div>
   )
 }
