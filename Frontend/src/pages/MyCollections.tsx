@@ -1,4 +1,4 @@
-import { Flex, Spinner, Text } from "@chakra-ui/react"
+import { Flex, Heading, Spinner, Text } from "@chakra-ui/react"
 import { useContext, useEffect, useState } from "react"
 import { useAccount } from "wagmi"
 import { Gallery } from "../components/Gallery"
@@ -14,13 +14,11 @@ export function MyCollections(props: Props) {
   const {
     daoContract,
     winningProposalIndex,
-    setWinningCollection,
     winningCollection,
     isWinningCollectionsLoading,
-    setIsWinningCollectionsLoading,
   } = useContext(StateContext)
 
-  const { address } = useAccount()
+  const { address, isConnected } = useAccount()
 
   const [percents, setPercents] = useState<number[]>([])
 
@@ -54,23 +52,33 @@ export function MyCollections(props: Props) {
 
   return (
     <ContentWrapper>
-      {isWinningCollectionsLoading ? (
-        <Flex justifyContent="center">
-          <Spinner />
-        </Flex>
-      ) : // @ts-ignore
-      !proposalVoters.includes(address) ? (
-        <Text>You haven't voted for a winning collection yet. Good luck!</Text>
+      <Heading>Winning collections you've received an airdrop</Heading>
+
+      {isConnected ? (
+        isWinningCollectionsLoading ? (
+          <Flex justifyContent="center">
+            <Spinner />
+          </Flex>
+        ) : // @ts-ignore
+        !proposalVoters.includes(address) ? (
+          <Text>
+            You haven't voted for a winning collection yet. Good luck!
+          </Text>
+        ) : (
+          <Gallery
+            images={winningCollection
+              .filter((item: any) => item.Name.endsWith("png"))
+              .map((item: any) => "https://ipfs.io/ipfs/" + item.Hash)}
+            artistName="Mr T."
+            {...(winningProposalIndex
+              ? { percent: percents[winningProposalIndex] }
+              : {})}
+          />
+        )
       ) : (
-        <Gallery
-          images={winningCollection
-            .filter((item: any) => item.Name.endsWith("png"))
-            .map((item: any) => "https://ipfs.io/ipfs/" + item.Hash)}
-          artistName="Mr T."
-          {...(winningProposalIndex
-            ? { percent: percents[winningProposalIndex] }
-            : {})}
-        />
+        <Text>
+          Please connect to your wallet to interact with the dashboard.
+        </Text>
       )}
     </ContentWrapper>
   )

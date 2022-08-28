@@ -27,8 +27,8 @@ export default function useLoadWinningCollection(_props: Props) {
       if (
         !daoContract ||
         proposals.length === 0 ||
+        winningProposalIndex ||
         winningCollection ||
-        !winningProposalIndex ||
         isWinningCollectionsLoading
       )
         return
@@ -39,12 +39,14 @@ export default function useLoadWinningCollection(_props: Props) {
       try {
         setIsWinningCollectionsLoading(true)
 
-        const winningProposal = await daoContract.getWinningProposal()
+        const winningProposalIndex = await daoContract.getWinningProposal()
+        console.log("Winning Proposal Index", winningProposalIndex)
 
-        setWinningProposalIndex(winningProposal)
+        setWinningProposalIndex(winningProposalIndex)
         // TODO: for now, we only have one winning collection
 
-        const ipfsFolderCID = proposals[winningProposalIndex].ipfsFolderCID
+        const ipfsFolderCID =
+          proposals[winningProposalIndex?.toNumber()].ipfsFolderCID
 
         const { data } = await axios.get(
           `https://dweb.link/api/v0/ls?arg=${ipfsFolderCID}`

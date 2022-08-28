@@ -1,8 +1,10 @@
 import { Box, Divider, Flex, Image } from "@chakra-ui/react"
 import React from "react"
 import { Link } from "react-router-dom"
+import addproposal from "../assets/addproposal.svg"
 import mycollections from "../assets/mycollections.svg"
 import vote from "../assets/vote.svg"
+import votingoverview from "../assets/votingoverview.svg"
 
 interface Props {
   children: React.ReactNode
@@ -15,7 +17,7 @@ export default function Sidebar({ children }: Props) {
         <Link to="/voting-overview">
           <Flex alignItems="center" gap={4}>
             <Box w={6}>
-              <Image src={vote} alt="logo" />
+              <Image src={votingoverview} alt="logo" />
             </Box>
             Voting Overview
           </Flex>
@@ -27,6 +29,15 @@ export default function Sidebar({ children }: Props) {
               <Image src={vote} alt="logo" />
             </Box>
             Vote
+          </Flex>
+        </Link>
+
+        <Link to="/add-proposal">
+          <Flex alignItems="center" gap={4}>
+            <Box w={6}>
+              <Image src={addproposal} alt="logo" />
+            </Box>
+            Add Proposal
           </Flex>
         </Link>
 

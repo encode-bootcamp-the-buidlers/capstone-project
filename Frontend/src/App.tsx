@@ -5,6 +5,7 @@ import { Route, Routes } from "react-router"
 import { BrowserRouter } from "react-router-dom"
 import Header from "./components/Header"
 import Sidebar from "./components/Sidebar"
+import { AddProposal } from "./pages/AddProposal"
 import { Home } from "./pages/Home"
 import { MyCollections } from "./pages/MyCollections"
 import { Vote } from "./pages/Vote"
@@ -26,7 +27,7 @@ function App() {
     number | null
   >(null)
 
-  const [winningCollection, setWinningCollection] = useState<any>({})
+  const [winningCollection, setWinningCollection] = useState<any>(null)
   useState<boolean>(false)
   const [isWinningCollectionsLoading, setIsWinningCollectionsLoading] =
     useState<boolean>(false)
@@ -66,6 +67,7 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/voting-overview" element={<VotingOverview />} />
                 <Route path="/vote" element={<Vote />} />
+                <Route path="/add-proposal" element={<AddProposal />} />
                 <Route path="/my-collections" element={<MyCollections />} />
               </Routes>
             </Flex>
