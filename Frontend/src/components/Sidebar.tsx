@@ -17,7 +17,7 @@ export default function Sidebar({ children }: Props) {
         <Link to="/voting-overview">
           <Flex alignItems="center" gap={4}>
             <Box w={6}>
-              <Image src={vote} alt="logo" />
+              <Image src={votingoverview} alt="logo" />
             </Box>
             Voting Overview
           </Flex>
@@ -26,7 +26,7 @@ export default function Sidebar({ children }: Props) {
         <Link to="/vote">
           <Flex alignItems="center" gap={4}>
             <Box w={6}>
-              <Image src={votingoverview} alt="logo" />
+              <Image src={vote} alt="logo" />
             </Box>
             Vote
           </Flex>
