@@ -162,6 +162,18 @@ contract Ballot is KeeperCompatibleInterface, NFTContract {
     return proposalVoters[index];
   }
 
+  function addProposal(uint256 collectionSize, string memory ipfsFolderCID) external {
+    proposals.push(
+      Proposal({
+        index: proposals.length,
+        voteCount: 0,
+        active: true,
+        ipfsFolderCID: ipfsFolderCID,
+        collectionSize: collectionSize
+      })
+    );
+  }
+
   /// @dev this method is called by the keepers. It will mint the NFT collection
   function performUpkeep(bytes calldata) external override onlyKeeperRegistry {
     (bool upkeepNeeded, ) = checkUpkeep("");

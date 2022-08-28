@@ -12,6 +12,7 @@ import {
   NumberInputStepper,
   Spinner,
   Text,
+  Box,
 } from "@chakra-ui/react"
 import { useContext, useState } from "react"
 import { useAccount } from "wagmi"
@@ -68,56 +69,60 @@ export function AddProposal(_props: Props) {
       {isConnected ? (
         <>
           {" "}
-          <FormControl mt={10}>
-            <FormLabel>Collection Size</FormLabel>
+          <Box display="flex" flexDirection="column" alignItems="center">
+            <FormControl mt={10}>
+              <FormLabel>Collection Size</FormLabel>
 
-            <NumberInput
-              min={0}
-              step={1}
-              value={input.collectionSize}
-              onChange={(value) =>
-                setInput({
-                  ...input,
-                  collectionSize: value,
-                })
-              }
-              isInvalid={isError.collectionSize}
+              <NumberInput
+                min={0}
+                step={1}
+                value={input.collectionSize}
+                onChange={(value) =>
+                  setInput({
+                    ...input,
+                    collectionSize: value,
+                  })
+                }
+                isInvalid={isError.collectionSize}
+              >
+                <NumberInputField />
+                <NumberInputStepper>
+                  <NumberIncrementStepper />
+                  <NumberDecrementStepper />
+                </NumberInputStepper>
+              </NumberInput>
+              <FormHelperText>
+                How many items does your collection have?
+              </FormHelperText>
+
+              <FormLabel mt={5}>IPFS Folder CID</FormLabel>
+              <Input
+                type="text"
+                value={input.ipfsFolderCID}
+                onChange={(e) =>
+                  setInput({
+                    ...input,
+                    ipfsFolderCID: e.target.value,
+                  })
+                }
+                isInvalid={isError.ipfsFolderCID}
+              />
+              <FormHelperText>
+                Please label your collection 0.json, 1.json, ... inside the folder
+              </FormHelperText>
+            </FormControl>
+            <Button
+              colorScheme="teal"
+              isDisabled={isSubmitting}
+              onClick={() => onSubmit()}
+              w="fit-content"
+              marginTop="30px"
+              px="30px"
+              py="10px"
             >
-              <NumberInputField />
-              <NumberInputStepper>
-                <NumberIncrementStepper />
-                <NumberDecrementStepper />
-              </NumberInputStepper>
-            </NumberInput>
-            <FormHelperText>
-              How many items does your collection have?
-            </FormHelperText>
-
-            <FormLabel mt={5}>IPFS Folder CID</FormLabel>
-            <Input
-              type="text"
-              value={input.ipfsFolderCID}
-              onChange={(e) =>
-                setInput({
-                  ...input,
-                  ipfsFolderCID: e.target.value,
-                })
-              }
-              isInvalid={isError.ipfsFolderCID}
-            />
-            <FormHelperText>
-              Please label your collection 0.json, 1.json, ... inside the folder
-            </FormHelperText>
-          </FormControl>
-          <Button
-            colorScheme="teal"
-            // remove '|| true' after backend implementation is set
-            isDisabled={isSubmitting || true}
-            onClick={() => onSubmit()}
-            w="fit-content"
-          >
-            {isSubmitting ? <Spinner /> : "Submit"}
-          </Button>
+              {isSubmitting ? <Spinner /> : "Submit"}
+            </Button>
+          </Box>
         </>
       ) : (
         <Text>
